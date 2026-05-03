@@ -42,7 +42,7 @@ export default function Upload() {
     setSyllabusText,
     setAnalysisProgress,
     clearAnalysis,
-    extractedTexts,
+    analysisComplete,
   } = useAppStore()
 
   // On mount: if metadata exists but no local files, show session notice (handled by staleSession derived state)
@@ -57,10 +57,24 @@ export default function Upload() {
     Array.from(e.target.files).filter(f => f.type === 'application/pdf').forEach(addFile)
   }
 
+  const MAX_FILE_BYTES = 50 * 1024 * 1024
+  const SOFT_FILE_LIMIT = 10
+
   function addFile(f) {
+    if (f.size > MAX_FILE_BYTES) {
+      setErrorMsg(`"${f.name}" is too large. Maximum file size is 50MB.`)
+      return
+    }
     const id = Date.now() + Math.random()
     const meta = { id, name: f.name, size: f.size, year: String(new Date().getFullYear()), subject: 'Physics' }
-    setLocalFiles(prev => [...prev, { ...meta, file: f }])
+    setLocalFiles(prev => {
+      const next = [...prev, { ...meta, file: f }]
+      if (next.length === SOFT_FILE_LIMIT + 1) {
+        setClearMsg(`Processing more than ${SOFT_FILE_LIMIT} files may take several minutes.`)
+        setTimeout(() => setClearMsg(''), 5000)
+      }
+      return next
+    })
     addFileMetadata(meta)
   }
 
@@ -77,6 +91,10 @@ export default function Upload() {
   const handleSyllabus = (e) => {
     const f = e.target.files[0]
     if (!f) return
+    if (f.size > MAX_FILE_BYTES) {
+      setErrorMsg(`"${f.name}" is too large. Maximum file size is 50MB.`)
+      return
+    }
     setLocalSyllabus({ file: f, name: f.name, size: f.size })
     setSyllabusMetadata({ name: f.name, size: f.size })
   }
@@ -99,6 +117,7 @@ export default function Upload() {
   }
 
   const handleAnalyze = async () => {
+    if (isAnalyzing) return
     setIsAnalyzing(true)
     setErrorMsg('')
     setProgressMsg('Starting analysis…')
@@ -138,16 +157,20 @@ export default function Upload() {
       navigate('/app/dashboard')
 
     } catch (err) {
-      console.error('Analysis error:', err)
+      console.error('Analysis failed:', err.message)
       setIsAnalyzing(false)
-      setAnalysisError(err.message)
-      setErrorMsg(err.message || 'Something went wrong during analysis. Please try again.')
+      const msg = err.message || ''
+      const friendly = (msg.toLowerCase().includes('fetch') || msg.toLowerCase().includes('network') || msg.toLowerCase().includes('failed to fetch'))
+        ? 'Network error. Please check your connection and try again.'
+        : (msg || 'Something went wrong during analysis. Please try again.')
+      setAnalysisError(friendly)
+      setErrorMsg(friendly)
       setProgressMsg('')
     }
   }
 
   const years = Array.from({ length:10 }, (_, i) => String(new Date().getFullYear() - i))
-  const hasPreviousAnalysis = staleSession && extractedTexts && extractedTexts.length > 0;
+  const hasPreviousAnalysis = staleSession && analysisComplete;
   const canAnalyze = (localFiles.length > 0 && !isAnalyzing) || hasPreviousAnalysis;
 
   const handleAction = () => {
@@ -309,9 +332,10 @@ export default function Upload() {
         {/* ANALYZE NOW BUTTON */}
         <div style={{ marginTop:28 }}>
           <motion.button
-            onClick={canAnalyze ? handleAction : undefined}
-            whileHover={canAnalyze ? { scale:1.01 } : {}}
-            whileTap={canAnalyze ? { scale:0.99 } : {}}
+            disabled={!canAnalyze || isAnalyzing}
+            onClick={(canAnalyze && !isAnalyzing) ? handleAction : undefined}
+            whileHover={canAnalyze && !isAnalyzing ? { scale:1.01 } : {}}
+            whileTap={canAnalyze && !isAnalyzing ? { scale:0.99 } : {}}
             style={{
               width:'100%', padding:'1rem', borderRadius:8,
               background: canAnalyze ? BRAND : 'var(--bg-card-2)',

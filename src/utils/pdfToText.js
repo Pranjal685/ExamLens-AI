@@ -15,8 +15,13 @@ const TEXT_THRESHOLD = 20
  * @returns {Promise<string>} — concatenated text from all pages (capped)
  */
 export async function extractTextFromPDF(file, onPageProgress) {
-  const arrayBuffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+  let pdf
+  try {
+    const arrayBuffer = await file.arrayBuffer()
+    pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+  } catch {
+    throw new Error(`Could not open "${file.name}". File may be corrupted or not a valid PDF.`)
+  }
   const numPages = Math.min(pdf.numPages, MAX_PAGES)
 
   // First pass — extract text from ALL pages simultaneously
@@ -89,6 +94,10 @@ export async function extractTextFromPDF(file, onPageProgress) {
     }
 
     fullText = visionResults.join('\n')
+  }
+
+  if (!fullText || fullText.trim().length === 0) {
+    throw new Error(`No readable content found in "${file.name}". Please check the file and try again.`)
   }
 
   return fullText.slice(0, MAX_TEXT_LENGTH)

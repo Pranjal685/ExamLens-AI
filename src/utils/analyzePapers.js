@@ -1,5 +1,28 @@
 import { callAI } from './callAI'
 
+function sanitizeString(str) {
+  if (typeof str !== 'string') return str
+  return str
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+=/gi, '')
+    .trim()
+}
+
+function sanitizeAnalysisData(data) {
+  if (data === null || data === undefined) return data
+  if (Array.isArray(data)) return data.map((item) => sanitizeAnalysisData(item))
+  if (typeof data === 'string') return sanitizeString(data)
+  if (typeof data !== 'object') return data
+
+  const sanitized = {}
+  for (const [key, value] of Object.entries(data)) {
+    sanitized[key] = sanitizeAnalysisData(value)
+  }
+  return sanitized
+}
+
 export async function analyzePapers(extractedTexts, syllabusText = '') {
   const combinedPapers = extractedTexts
     .map((t, i) => `--- PAPER ${i + 1} ---\n${t.text}\n`)
@@ -71,11 +94,21 @@ Return ONLY the JSON. No explanation. No markdown fences.`
 
   const raw = await callAI(userPrompt, systemPrompt)
 
+  let parsed
   try {
-    return JSON.parse(raw)
+    parsed = JSON.parse(raw)
   } catch {
     const match = raw.match(/\{[\s\S]*\}/)
-    if (match) return JSON.parse(match[0])
-    throw new Error('Failed to parse AI response as JSON')
+    if (match) {
+      try {
+        parsed = JSON.parse(match[0])
+      } catch {
+        throw new Error('AI returned an unexpected response. Please try again.')
+      }
+    } else {
+      throw new Error('AI returned an unexpected response. Please try again.')
+    }
   }
+
+  return sanitizeAnalysisData(parsed)
 }

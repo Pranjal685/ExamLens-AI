@@ -85,7 +85,7 @@ export default function Planner() {
       const result = await analyzePapers(extractedTexts, syllabusText)
       setAnalysisData(result)
     } catch (err) {
-      console.error('Regenerate error:', err)
+      console.error('Regenerate failed:', err.message)
     } finally {
       setRegenerating(false)
     }

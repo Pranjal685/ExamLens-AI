@@ -66,8 +66,7 @@ const useAppStore = create(
       partialize: (state) => ({
         uploadedFilesMetadata: state.uploadedFilesMetadata,
         syllabusMetadata: state.syllabusMetadata,
-        extractedTexts: state.extractedTexts,
-        syllabusText: state.syllabusText,
+        // extractedTexts/syllabusText kept in-memory only — sensitive raw exam content
         analysisData: state.analysisData,
         analysisComplete: state.analysisComplete,
         isDark: state.isDark,
