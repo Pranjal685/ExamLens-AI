@@ -178,7 +178,7 @@ Get your free API key at: https://aistudio.google.com
 
 Built for **AI DecodeX Hackathon** by UnsaidTalks
 
-**[Your Name]** — [GitHub Profile]
+**Pranjal Sahu** — https://github.com/Pranjal685
 
 ---
 
