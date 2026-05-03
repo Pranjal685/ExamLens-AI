@@ -169,7 +169,7 @@ _(Update this section every 30–45 min when switching agents)_
 
 **Last updated:** 2026-05-03T16:25Z
 **Last completed:**
-1. **Study Planner Kanban Redesign & Compact Layout**: Overhauled `Planner.jsx` to completely replace the calendar grid. It now features a side-by-side layout (55% / 45%) matching Linear's issue list feel. Left side is a 3-column "Study Priority Board" with compact cards and correct priority badges. Right side is a horizontal chip-based "Daily Study Schedule". Both panels scroll independently (`calc(100vh - 220px)`) so the page itself fits perfectly in one viewport.
+1. **Final Polish Pass**: Executed a comprehensive UI polish across all pages. Added accent colors to dashboard charts and stat cards, fixed Planner kanban card truncation and chip wrapping, corrected Syllabus donut chart colors, improved Upload page UX for returning sessions, refined light mode sidebar active states, and standardized a crisp 200ms opacity fade for page transitions.
 2. **Syllabus Donut Chart Fix**: Updated donut chart in `Syllabus.jsx` to use accent color for coverage and muted color for gaps. Added a legend, adjusted progress bars, and styled gap topics with warning colors.
 3. **Sidebar Actions**: Built custom Framer Motion modals in `Sidebar.jsx` for Preferences, Help (expandable FAQ), and Logout (confirmation dialog).
 

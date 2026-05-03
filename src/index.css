@@ -145,8 +145,10 @@ body {
   background: transparent; width: 100%; text-align: left;
 }
 .nav-item:hover { background: var(--bg-hover); color: var(--text-1); }
-.nav-item.active { background: var(--bg-hover); color: var(--text-1); font-weight: 600; }
+.nav-item.active { background: #eaeaea; color: var(--text-1); font-weight: 600; position: relative; }
+.nav-item.active::before { content: ''; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
 .dark .nav-item.active { background: var(--bg-card-2); color: var(--text-1); font-weight: 600; }
+.dark .nav-item.active::before { display: none; }
 
 /* ── STAT CARD REFINED STYLES ──────────────────────────────── */
 .stat-card {
@@ -187,6 +189,9 @@ body {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 1rem;
   cursor: pointer; transition: all 0.2s ease;
+}
+html:not(.dark) .drop-zone {
+  border-color: #cccccc;
 }
 .drop-zone:hover, .drop-zone.over {
   border-color: var(--text-2);

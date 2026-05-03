@@ -60,14 +60,14 @@ export default function Syllabus() {
   const syllabusGaps = analysisData.syllabusGaps || []
   const totalTopics = analysisData.totalTopics || (analysisData.topics || []).length
   const coveredTopics = Math.round(totalTopics * (coverage / 100))
-  const uncoveredTopics = totalTopics - coveredTopics
+  const uncoveredTopics = syllabusGaps.length
 
   // Donut chart data
   const pieData = [
     { name: 'Covered', value: coverage },
     { name: 'Gaps', value: 100 - coverage },
   ]
-  const PIE_COLORS = ['#ef4444', 'var(--bg-card-2)']
+  const PIE_COLORS = ['#10b981', 'var(--bg-card-2)']
 
   return (
     <PageWrapper title="Syllabus">
@@ -111,7 +111,7 @@ export default function Syllabus() {
             
             <div style={{ display:'flex', gap:16, marginTop:24 }}>
               <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                <div style={{ width:10, height:10, borderRadius:'50%', background:'#ef4444' }} />
+                <div style={{ width:10, height:10, borderRadius:'50%', background:'#10b981' }} />
                 <span style={{ fontSize:13, color:'var(--text-2)' }}>Topics Covered</span>
                 <span style={{ fontSize:14, fontWeight:700, color:'var(--text-1)' }}>{coveredTopics}</span>
               </div>
@@ -141,7 +141,7 @@ export default function Syllabus() {
                 <div style={{ height:6, borderRadius:3, background:'var(--bg-card-2)', overflow:'hidden' }}>
                   <motion.div
                     initial={{ width:0 }} animate={{ width:`${coverage}%` }} transition={{ duration:1, delay:0.2 }}
-                    style={{ height:'100%', borderRadius:3, background:'#ef4444' }}
+                    style={{ height:'100%', borderRadius:3, background:'#10b981' }}
                   />
                 </div>
               </div>

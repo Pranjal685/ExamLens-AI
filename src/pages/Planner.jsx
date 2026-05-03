@@ -146,11 +146,12 @@ export default function Planner() {
                         whileHover={{ y:-2, borderColor: 'var(--border-2)', transition: { duration: 0.15 } }}
                         style={{
                           background:'var(--bg-card)', borderRadius:12, border:'1px solid var(--border)',
-                          padding: '12px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap: 12,
+                          borderLeft: `2px solid ${dotColor}`,
+                          padding: '12px 16px', display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap: 12,
                           transition: 'border-color 0.15s ease'
                         }}
                       >
-                        <h3 style={{ fontSize:13, fontWeight:500, color:'var(--text-1)', lineHeight:1.3, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.topic}</h3>
+                        <h3 style={{ fontSize:13, fontWeight:500, color:'var(--text-1)', lineHeight:1.4, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{t.topic}</h3>
                         <div style={{ display:'flex', alignItems:'center', gap: 8, flexShrink: 0 }}>
                           <span style={{ fontSize:12, fontWeight:600, color:'var(--text-2)', background:'var(--bg-card-2)', padding:'4px 10px', borderRadius:12 }}>
                             {t.hoursPerWeek || 0}h
@@ -200,7 +201,7 @@ export default function Planner() {
                           borderRadius: 8, padding: '8px 12px', cursor:'default'
                         }}
                       >
-                        <span style={{ fontSize:13, fontWeight:600, color:'var(--text-1)', maxWidth: 200, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{evt.topic}</span>
+                        <span style={{ fontSize:13, fontWeight:600, color:'var(--text-1)', maxWidth: 220, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{evt.topic}</span>
                         <span style={{ fontSize:12, fontWeight:500, color:'var(--text-3)' }}>{evt.duration}h</span>
                       </motion.div>
                     ))
@@ -224,9 +225,9 @@ export default function Planner() {
         ].map(({ val, label }, i) => (
           <motion.div key={label}
             initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.5 + i * 0.08 }}
-            style={{ background:'var(--bg-card-2)', borderRadius:12, padding:'20px 24px', display:'flex', alignItems:'baseline', gap:10 }}
+            style={{ background:'var(--bg-card-2)', borderRadius:12, padding:'20px 24px', display:'flex', alignItems:'center', gap:10 }}
           >
-            <p style={{ fontSize:'2.25rem', fontWeight:600, lineHeight:1, color:'var(--text-1)', letterSpacing:'-0.02em' }}>{val}</p>
+            <p style={{ fontSize:'36px', fontWeight:600, lineHeight:1, color:'var(--text-1)', letterSpacing:'-0.02em' }}>{val}</p>
             <p style={{ fontSize:14, fontWeight:500, color:'var(--text-3)' }}>{label}</p>
           </motion.div>
         ))}

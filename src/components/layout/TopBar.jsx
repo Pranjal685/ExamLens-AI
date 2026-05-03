@@ -30,8 +30,8 @@ export default function TopBar({ title = 'Dashboard' }) {
         </button>
 
         {/* User avatar */}
-        <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm text-white"
-             style={{ background: 'var(--brand)' }}>
+        <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm"
+             style={{ background: 'var(--brand)', color: 'var(--brand-text)' }}>
           S
         </div>
       </div>

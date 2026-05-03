@@ -42,6 +42,7 @@ export default function Upload() {
     setSyllabusText,
     setAnalysisProgress,
     clearAnalysis,
+    extractedTexts,
   } = useAppStore()
 
   // On mount: if metadata exists but no local files, show session notice (handled by staleSession derived state)
@@ -146,8 +147,16 @@ export default function Upload() {
   }
 
   const years = Array.from({ length:10 }, (_, i) => String(new Date().getFullYear() - i))
-  // Analyze requires actual File objects in local state
-  const canAnalyze = localFiles.length > 0 && !isAnalyzing
+  const hasPreviousAnalysis = staleSession && extractedTexts && extractedTexts.length > 0;
+  const canAnalyze = (localFiles.length > 0 && !isAnalyzing) || hasPreviousAnalysis;
+
+  const handleAction = () => {
+    if (hasPreviousAnalysis && localFiles.length === 0) {
+      navigate('/app/dashboard');
+    } else if (canAnalyze) {
+      handleAnalyze();
+    }
+  }
 
   // Display list: local files if available, else persisted metadata (read-only)
   const displayFiles = localFiles.length > 0 ? localFiles : uploadedFilesMetadata
@@ -219,7 +228,7 @@ export default function Upload() {
             <motion.div initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:'auto' }} exit={{ opacity:0, height:0 }}
               style={{ marginTop:24, display:'flex', flexDirection:'column', gap:10 }}>
               <p style={{ fontWeight:600, fontSize:'0.9rem', color:'var(--text-1)' }}>
-                {localFiles.length > 0 ? `Uploaded Files (${localFiles.length})` : `Previous Session Files (${uploadedFilesMetadata.length})`}
+                {localFiles.length > 0 ? `Uploaded Files (${localFiles.length})` : `Uploaded Papers (${uploadedFilesMetadata.length})`}
               </p>
               {displayFiles.map((f) => (
                 <motion.div key={f.id} layout initial={{ opacity:0, x:-16 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:16 }}
@@ -300,7 +309,7 @@ export default function Upload() {
         {/* ANALYZE NOW BUTTON */}
         <div style={{ marginTop:28 }}>
           <motion.button
-            onClick={canAnalyze ? handleAnalyze : undefined}
+            onClick={canAnalyze ? handleAction : undefined}
             whileHover={canAnalyze ? { scale:1.01 } : {}}
             whileTap={canAnalyze ? { scale:0.99 } : {}}
             style={{
@@ -313,7 +322,9 @@ export default function Upload() {
               transition:'background .2s',
             }}
           >
-            {isAnalyzing ? <><Loader2 size={20} className="animate-spin" /> Analyzing…</> : <>Analyze Now <ArrowRight size={20} /></>}
+            {isAnalyzing ? <><Loader2 size={20} className="animate-spin" /> Analyzing…</> : 
+              (hasPreviousAnalysis && localFiles.length === 0) ? <>View Previous Analysis <ArrowRight size={20} /></> :
+              <>Analyze Now <ArrowRight size={20} /></>}
           </motion.button>
           <p style={{ textAlign:'center', fontSize:'0.8rem', color:'var(--text-3)', marginTop:10 }}>
             AI will extract topics, frequency patterns, and generate your study plan

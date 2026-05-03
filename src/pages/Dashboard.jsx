@@ -103,10 +103,10 @@ export default function Dashboard() {
   const summary = data.summary || ''
 
   const STATS = [
-    { icon:Brain,    val: String(data.totalTopics || topics.length),             label:'Topics Analyzed' },
-    { icon:Flame,    val: String(data.highPriorityCount || topics.filter(t => t.priority === 'HIGH').length), label:'High Priority Topics' },
-    { icon:FileText, val: String(uploadedFilesMetadata.length),                  label:'Papers Analyzed' },
-    { icon:Target,   val: `${data.overallCoverage || 0}%`,                       label:'Syllabus Coverage' },
+    { icon:Brain,    val: String(data.totalTopics || topics.length),             label:'Topics Analyzed', color:'var(--brand)' },
+    { icon:Flame,    val: String(data.highPriorityCount || topics.filter(t => t.priority === 'HIGH').length), label:'High Priority Topics', color:'#ef4444' },
+    { icon:FileText, val: String(uploadedFilesMetadata.length),                  label:'Papers Analyzed', color:'#3b82f6' },
+    { icon:Target,   val: `${data.overallCoverage || 0}%`,                       label:'Syllabus Coverage', color:'#10b981' },
   ]
 
   return (
@@ -116,18 +116,19 @@ export default function Dashboard() {
         {/* SUMMARY CARD */}
         {summary && (
           <motion.div initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.4 }}
-            style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderLeft:`4px solid var(--text-2)`, borderRadius:12, padding:'18px 22px', display:'flex', alignItems:'flex-start', gap:12 }}>
-            <Info size={18} color="var(--text-1)" style={{ flexShrink:0, marginTop:2 }} />
-            <p style={{ fontSize:'0.9rem', color:'var(--text-2)', lineHeight:1.6 }}>{summary}</p>
+            style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderLeft:`3px solid var(--brand)`, borderRadius:12, padding:'18px 22px', display:'flex', alignItems:'flex-start', gap:12 }}>
+            <Info size={18} color="var(--brand)" style={{ flexShrink:0, marginTop:2 }} />
+            <p style={{ fontSize:'13px', color:'var(--text-2)', lineHeight:1.6 }}>{summary}</p>
           </motion.div>
         )}
 
         {/* STAT CARDS — grid-cols-4 */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
-          {STATS.map(({ icon: Icon, val, label }, i) => (
+          {STATS.map(({ icon: Icon, val, label, color }, i) => (
             <motion.div key={label}
               initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay: i * 0.08 }}
               className="stat-card"
+              style={{ borderTop: `2px solid ${color}` }}
               whileHover={{ y:-2 }}
             >
               <div className="stat-icon-wrap">
@@ -152,7 +153,7 @@ export default function Dashboard() {
                 <XAxis dataKey="topic" tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, fontSize:12 }} cursor={{ fill:'var(--bg-hover)' }} />
-                <Bar dataKey="count" fill="var(--text-1)" radius={[2,2,0,0]} animationDuration={800} animationBegin={0} />
+                <Bar dataKey="count" fill="var(--brand)" fillOpacity={0.85} radius={[2,2,0,0]} animationDuration={800} animationBegin={0} />
               </BarChart>
             </ResponsiveContainer>
           </motion.div>
@@ -160,15 +161,21 @@ export default function Dashboard() {
           <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ delay:0.1 }}
             style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:16, padding:24 }}>
             <p style={{ fontWeight:600, fontSize:16, marginBottom:20, color:'var(--text-1)' }}>Year-Wise Trend</p>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={trendData} margin={{ top:0, right:10, left:-20, bottom:0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="year" tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, fontSize:12 }} />
-                <Line type="monotone" dataKey="topics" stroke="var(--text-2)" strokeWidth={2} dot={{ fill:'var(--bg-card)', stroke:'var(--text-2)', strokeWidth:2, r:3 }} activeDot={{ r:5, fill:'var(--text-1)', stroke:'var(--text-1)' }} animationDuration={800} animationBegin={0} />
-              </LineChart>
-            </ResponsiveContainer>
+            {trendData.length < 2 ? (
+              <div style={{ height: 220, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                <span style={{ fontSize: 13, color: 'var(--text-3)' }}>Upload papers from multiple years to see trends</span>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={trendData} margin={{ top:0, right:10, left:-20, bottom:0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="year" tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, fontSize:12 }} />
+                  <Line type="monotone" dataKey="topics" stroke="var(--text-2)" strokeWidth={2} dot={{ fill:'var(--bg-card)', stroke:'var(--text-2)', strokeWidth:2, r:3 }} activeDot={{ r:5, fill:'var(--text-1)', stroke:'var(--text-1)' }} animationDuration={800} animationBegin={0} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </motion.div>
         </div>
 
