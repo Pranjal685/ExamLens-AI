@@ -2,7 +2,7 @@ import { Bell, Sun, Moon } from 'lucide-react'
 import useAppStore from '../../store/useAppStore'
 
 export default function TopBar({ title = 'Dashboard' }) {
-  const { darkMode, toggleDarkMode } = useAppStore()
+  const { isDark, toggleTheme } = useAppStore()
 
   return (
     <header className="topbar">
@@ -11,12 +11,12 @@ export default function TopBar({ title = 'Dashboard' }) {
       <div className="flex items-center gap-3">
         {/* Dark / Light toggle */}
         <button
-          onClick={toggleDarkMode}
+          onClick={toggleTheme}
           className="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
           style={{ background: 'var(--bg-card-2)', color: 'var(--text-2)' }}
-          title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
         >
-          {darkMode ? <Sun size={17} /> : <Moon size={17} />}
+          {isDark ? <Sun size={17} /> : <Moon size={17} />}
         </button>
 
         {/* Notification bell */}

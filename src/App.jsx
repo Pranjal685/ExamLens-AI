@@ -8,15 +8,11 @@ import Syllabus from './pages/Syllabus'
 import useAppStore from './store/useAppStore'
 
 export default function App() {
-  const darkMode = useAppStore(s => s.darkMode)
+  const isDark = useAppStore(s => s.isDark)
 
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }, [darkMode])
+    document.documentElement.classList.toggle('dark', isDark)
+  }, [isDark])
 
   return (
     <Routes>

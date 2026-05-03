@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UploadCloud, FileText, X, Info, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
+import { UploadCloud, FileText, X, Info, ArrowRight, Loader2, AlertCircle, Trash2, RefreshCw } from 'lucide-react'
 import PageWrapper from '../components/layout/PageWrapper'
 import useAppStore from '../store/useAppStore'
 import { extractTextFromPDF } from '../utils/pdfToText'
@@ -18,82 +18,127 @@ export default function Upload() {
   const [dragOver, setDragOver] = useState(false)
   const [progressMsg, setProgressMsg] = useState('')
   const [errorMsg, setErrorMsg] = useState('')
+  const [clearMsg, setClearMsg] = useState('')
+  // Local state holds actual File objects — not serializable, session-only
+  const [localFiles, setLocalFiles] = useState([])
+  const [localSyllabus, setLocalSyllabus] = useState(null)
   const fileInputRef = useRef()
   const syllabusRef = useRef()
   const navigate = useNavigate()
 
   const {
-    papersFiles, addPaperFile, removePaperFile, updatePaperFile,
-    syllabusFile, setSyllabusFile, clearSyllabusFile,
-    isAnalyzing, setAnalyzing, setAnalysisData, setAnalysisError,
-    setExtractedTexts, setSyllabusText, setAnalysisProgress,
+    uploadedFilesMetadata,
+    syllabusMetadata,
+    addFileMetadata,
+    removeFileMetadata,
+    updateFileMetadata,
+    setSyllabusMetadata,
+    clearSyllabusMetadata,
+    isAnalyzing,
+    setIsAnalyzing,
+    setAnalysisData,
+    setAnalysisError,
+    setExtractedTexts,
+    setSyllabusText,
+    setAnalysisProgress,
+    clearAnalysis,
   } = useAppStore()
+
+  // On mount: if metadata exists but no local files, show session notice (handled by staleSession derived state)
+  const staleSession = uploadedFilesMetadata.length > 0 && localFiles.length === 0
 
   const handleDrop = useCallback((e) => {
     e.preventDefault(); setDragOver(false)
-    Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf')
-      .forEach(f => addPaperFile({ id: Date.now() + Math.random(), file:f, name:f.name, size:f.size, year: String(new Date().getFullYear()), subject:'Physics' }))
-  }, [addPaperFile])
+    Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf').forEach(addFile)
+  }, [])
 
   const handleFileInput = (e) => {
-    Array.from(e.target.files).filter(f => f.type === 'application/pdf')
-      .forEach(f => addPaperFile({ id: Date.now() + Math.random(), file:f, name:f.name, size:f.size, year: String(new Date().getFullYear()), subject:'Physics' }))
+    Array.from(e.target.files).filter(f => f.type === 'application/pdf').forEach(addFile)
+  }
+
+  function addFile(f) {
+    const id = Date.now() + Math.random()
+    const meta = { id, name: f.name, size: f.size, year: String(new Date().getFullYear()), subject: 'Physics' }
+    setLocalFiles(prev => [...prev, { ...meta, file: f }])
+    addFileMetadata(meta)
+  }
+
+  function removeFile(id) {
+    setLocalFiles(prev => prev.filter(f => f.id !== id))
+    removeFileMetadata(id)
+  }
+
+  function updateFile(id, updates) {
+    setLocalFiles(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f))
+    updateFileMetadata(id, updates)
   }
 
   const handleSyllabus = (e) => {
     const f = e.target.files[0]
-    if (f) setSyllabusFile({ file:f, name:f.name, size:f.size })
+    if (!f) return
+    setLocalSyllabus({ file: f, name: f.name, size: f.size })
+    setSyllabusMetadata({ name: f.name, size: f.size })
+  }
+
+  function removeSyllabus() {
+    setLocalSyllabus(null)
+    clearSyllabusMetadata()
   }
 
   const fmt = (b) => b > 1e6 ? `${(b/1e6).toFixed(1)} MB` : `${(b/1e3).toFixed(0)} KB`
 
+  const handleClearAll = () => {
+    clearAnalysis()
+    setLocalFiles([])
+    setLocalSyllabus(null)
+    setErrorMsg('')
+    setProgressMsg('')
+    setClearMsg('All data cleared')
+    setTimeout(() => setClearMsg(''), 3000)
+  }
+
   const handleAnalyze = async () => {
-    setAnalyzing(true)
+    setIsAnalyzing(true)
     setErrorMsg('')
     setProgressMsg('Starting analysis…')
     setAnalysisProgress('Starting analysis…')
 
     try {
-      // Step 1: Extract text from each uploaded paper
       const extractedTexts = []
-      for (let i = 0; i < papersFiles.length; i++) {
-        const f = papersFiles[i]
-        const msg = `Extracting text from Paper ${i + 1} of ${papersFiles.length} — ${f.name}`
+      for (let i = 0; i < localFiles.length; i++) {
+        const f = localFiles[i]
+        const msg = `Extracting text from Paper ${i + 1} of ${localFiles.length} — ${f.name}`
         setProgressMsg(msg)
         setAnalysisProgress(msg)
 
         const text = await extractTextFromPDF(f.file, (page, total) => {
-          setProgressMsg(`Extracting text from Paper ${i + 1} of ${papersFiles.length} — Page ${page}/${total}`)
+          setProgressMsg(`Extracting text from Paper ${i + 1} of ${localFiles.length} — Page ${page}/${total}`)
         })
 
         extractedTexts.push({ text, name: f.name, year: f.year, subject: f.subject })
       }
 
-      // Store raw texts in Zustand for Regenerate
       setExtractedTexts(extractedTexts)
 
-      // Step 2: Extract syllabus text if provided
       let syllabusTextContent = ''
-      if (syllabusFile) {
+      if (localSyllabus) {
         setProgressMsg('Extracting syllabus text…')
         setAnalysisProgress('Extracting syllabus text…')
-        syllabusTextContent = await extractTextFromPDF(syllabusFile.file)
+        syllabusTextContent = await extractTextFromPDF(localSyllabus.file)
         setSyllabusText(syllabusTextContent)
       }
 
-      // Step 3: Run AI analysis
       setProgressMsg('AI is analyzing topic patterns…')
       setAnalysisProgress('AI is analyzing topic patterns…')
       const result = await analyzePapers(extractedTexts, syllabusTextContent)
 
-      // Step 4: Store result and navigate
       setAnalysisData(result)
       setProgressMsg('')
       navigate('/app/dashboard')
 
     } catch (err) {
       console.error('Analysis error:', err)
-      setAnalyzing(false)
+      setIsAnalyzing(false)
       setAnalysisError(err.message)
       setErrorMsg(err.message || 'Something went wrong during analysis. Please try again.')
       setProgressMsg('')
@@ -101,11 +146,49 @@ export default function Upload() {
   }
 
   const years = Array.from({ length:10 }, (_, i) => String(new Date().getFullYear() - i))
-  const canAnalyze = papersFiles.length > 0 && !isAnalyzing
+  // Analyze requires actual File objects in local state
+  const canAnalyze = localFiles.length > 0 && !isAnalyzing
+
+  // Display list: local files if available, else persisted metadata (read-only)
+  const displayFiles = localFiles.length > 0 ? localFiles : uploadedFilesMetadata
 
   return (
     <PageWrapper title="Upload Papers">
       <div style={{ maxWidth:860, margin:'0 auto' }}>
+
+        {/* PAGE HEADER with Clear button */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            {clearMsg && (
+              <motion.span initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+                style={{ fontSize:'0.78rem', color:'#10b981', fontWeight:600 }}>
+                {clearMsg}
+              </motion.span>
+            )}
+          </div>
+          <button
+            onClick={handleClearAll}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'0.4rem 1rem', borderRadius:9999, border:'1.5px solid var(--border)', background:'transparent', color:'var(--text-3)', fontSize:'0.8rem', fontWeight:600, cursor:'pointer' }}
+          >
+            <Trash2 size={13} /> Clear All Data
+          </button>
+        </div>
+
+        {/* SESSION NOTICE — previous session files, no File objects available */}
+        <AnimatePresence>
+          {staleSession && (
+            <motion.div initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
+              style={{ marginBottom:16, background:'#fef3c7', border:'1px solid #fcd34d', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', gap:10 }}>
+              <RefreshCw size={15} color="#92400e" style={{ flexShrink:0 }} />
+              <p style={{ fontSize:'0.82rem', color:'#92400e', flex:1 }}>
+                Previous session files shown — re-upload to re-analyze
+              </p>
+              <button onClick={handleClearAll} style={{ background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
+                <X size={14} color="#92400e" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* MAIN DROP ZONE */}
         <motion.div initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.4 }}>
@@ -132,13 +215,15 @@ export default function Upload() {
 
         {/* UPLOADED FILES LIST */}
         <AnimatePresence>
-          {papersFiles.length > 0 && (
+          {displayFiles.length > 0 && (
             <motion.div initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:'auto' }} exit={{ opacity:0, height:0 }}
               style={{ marginTop:24, display:'flex', flexDirection:'column', gap:10 }}>
-              <p style={{ fontWeight:600, fontSize:'0.9rem', color:'var(--text-1)' }}>Uploaded Files ({papersFiles.length})</p>
-              {papersFiles.map((f) => (
+              <p style={{ fontWeight:600, fontSize:'0.9rem', color:'var(--text-1)' }}>
+                {localFiles.length > 0 ? `Uploaded Files (${localFiles.length})` : `Previous Session Files (${uploadedFilesMetadata.length})`}
+              </p>
+              {displayFiles.map((f) => (
                 <motion.div key={f.id} layout initial={{ opacity:0, x:-16 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:16 }}
-                  style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', gap:12 }}>
+                  style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', gap:12, opacity: staleSession ? 0.7 : 1 }}>
                   <div style={{ width:36, height:36, borderRadius:8, background:'#fee2e2', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                     <FileText size={17} color="#ef4444" />
                   </div>
@@ -146,17 +231,21 @@ export default function Upload() {
                     <p style={{ fontWeight:600, fontSize:'0.875rem', color:'var(--text-1)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.name}</p>
                     <p style={{ fontSize:'0.72rem', color:'var(--text-3)' }}>{fmt(f.size)}</p>
                   </div>
-                  <select value={f.year} onChange={e => updatePaperFile(f.id, { year:e.target.value })}
-                    style={{ background:'#fef3c7', color:'#92400e', border:'none', borderRadius:9999, padding:'0.2rem 0.55rem', fontSize:'0.72rem', fontWeight:600, cursor:'pointer', outline:'none' }}>
-                    {years.map(y => <option key={y}>{y}</option>)}
-                  </select>
-                  <select value={f.subject} onChange={e => updatePaperFile(f.id, { subject:e.target.value })}
-                    style={{ background:'rgba(14,165,233,0.12)', color:BRAND, border:'none', borderRadius:9999, padding:'0.2rem 0.55rem', fontSize:'0.72rem', fontWeight:600, cursor:'pointer', outline:'none' }}>
-                    {SUBJECTS.map(s => <option key={s}>{s}</option>)}
-                  </select>
-                  <button onClick={() => removePaperFile(f.id)} style={{ width:28, height:28, borderRadius:'50%', background:'var(--bg-card-2)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    <X size={12} style={{ color:'var(--text-3)' }} />
-                  </button>
+                  {!staleSession && (
+                    <>
+                      <select value={f.year} onChange={e => updateFile(f.id, { year:e.target.value })}
+                        style={{ background:'#fef3c7', color:'#92400e', border:'none', borderRadius:9999, padding:'0.2rem 0.55rem', fontSize:'0.72rem', fontWeight:600, cursor:'pointer', outline:'none' }}>
+                        {years.map(y => <option key={y}>{y}</option>)}
+                      </select>
+                      <select value={f.subject} onChange={e => updateFile(f.id, { subject:e.target.value })}
+                        style={{ background:'rgba(14,165,233,0.12)', color:BRAND, border:'none', borderRadius:9999, padding:'0.2rem 0.55rem', fontSize:'0.72rem', fontWeight:600, cursor:'pointer', outline:'none' }}>
+                        {SUBJECTS.map(s => <option key={s}>{s}</option>)}
+                      </select>
+                      <button onClick={() => removeFile(f.id)} style={{ width:28, height:28, borderRadius:'50%', background:'var(--bg-card-2)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                        <X size={12} style={{ color:'var(--text-3)' }} />
+                      </button>
+                    </>
+                  )}
                 </motion.div>
               ))}
             </motion.div>
@@ -170,11 +259,13 @@ export default function Upload() {
             <span style={{ fontSize:'0.72rem', color:'var(--text-3)', background:'var(--bg-card-2)', padding:'0.12rem 0.5rem', borderRadius:9999 }}>Optional</span>
             <Info size={13} style={{ color:'var(--text-3)' }} title="Enables AI syllabus gap analysis" />
           </div>
-          {syllabusFile ? (
+          {(localSyllabus || syllabusMetadata) ? (
             <div style={{ display:'flex', alignItems:'center', gap:10, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:12, padding:'12px 16px' }}>
               <FileText size={17} color={BRAND} />
-              <span style={{ flex:1, fontSize:'0.875rem', color:'var(--text-1)' }}>{syllabusFile.name}</span>
-              <button onClick={clearSyllabusFile} style={{ background:'none', border:'none', cursor:'pointer' }}><X size={14} style={{ color:'var(--text-3)' }} /></button>
+              <span style={{ flex:1, fontSize:'0.875rem', color:'var(--text-1)' }}>{(localSyllabus || syllabusMetadata).name}</span>
+              {!staleSession && (
+                <button onClick={removeSyllabus} style={{ background:'none', border:'none', cursor:'pointer' }}><X size={14} style={{ color:'var(--text-3)' }} /></button>
+              )}
             </div>
           ) : (
             <div className="drop-zone" style={{ minHeight:160, cursor:'pointer' }} onClick={() => syllabusRef.current.click()}>

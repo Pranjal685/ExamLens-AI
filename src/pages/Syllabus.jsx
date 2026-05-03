@@ -45,7 +45,7 @@ function NoSyllabusPrompt() {
 }
 
 export default function Syllabus() {
-  const { analysisData, syllabusFile } = useAppStore()
+  const { analysisData, syllabusMetadata } = useAppStore()
 
   // No analysis at all
   if (!analysisData) {
@@ -180,7 +180,7 @@ export default function Syllabus() {
         )}
 
         {/* PROMPT TO UPLOAD SYLLABUS */}
-        {!syllabusFile && <NoSyllabusPrompt />}
+        {!syllabusMetadata && <NoSyllabusPrompt />}
 
       </div>
     </PageWrapper>

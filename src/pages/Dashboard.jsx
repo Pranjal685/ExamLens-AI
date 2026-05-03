@@ -73,7 +73,7 @@ function EmptyDashboard() {
 }
 
 export default function Dashboard() {
-  const { analysisData, analysisComplete, isAnalyzing, papersFiles } = useAppStore()
+  const { analysisData, analysisComplete, isAnalyzing, uploadedFilesMetadata } = useAppStore()
 
   // Loading state
   if (isAnalyzing) {
@@ -105,7 +105,7 @@ export default function Dashboard() {
   const STATS = [
     { icon:Brain,    bg:'#d1fae5', fg:'#065f46', val: String(data.totalTopics || topics.length),             label:'Topics Analyzed' },
     { icon:Flame,    bg:'#fef3c7', fg:'#92400e', val: String(data.highPriorityCount || topics.filter(t => t.priority === 'HIGH').length), label:'High Priority Topics' },
-    { icon:FileText, bg:'#ede9fe', fg:'#4c1d95', val: String(papersFiles.length),                            label:'Papers Analyzed' },
+    { icon:FileText, bg:'#ede9fe', fg:'#4c1d95', val: String(uploadedFilesMetadata.length),                  label:'Papers Analyzed' },
     { icon:Target,   bg:'#ffe4e6', fg:'#881337', val: `${data.overallCoverage || 0}%`,                       label:'Syllabus Coverage' },
   ]
 

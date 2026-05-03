@@ -12,8 +12,8 @@ AI-powered past paper analyzer that maps topic frequency against syllabus, ranks
 ## Tech Stack
 - **Framework:** React + Vite
 - **Styling:** Tailwind CSS + shadcn/ui
-- **AI:** OpenRouter API (key in `.env` as `VITE_OPENROUTER_KEY`)
-- **Models:** `google/gemini-2.0-flash` (vision/image PDFs) + `anthropic/claude-3.5-sonnet` (analysis)
+- **AI:** Gemini API (paid tier)
+- **Models:** `gemini-1.5-flash` via Google AI Studio — both vision/image PDFs and text analysis
 - **Charts:** Recharts
 - **Animations:** Framer Motion
 - **Icons:** Lucide React
@@ -90,32 +90,18 @@ Is it image-based? (check if text extraction returns <50 chars)
 pdf.js → render page        pdfjs text extraction
 as canvas → base64 image         ↓
      ↓                      raw text
-Send image to vision model (gemini-2.0-flash via OpenRouter)
+Send image to Gemini 1.5 Flash (vision)
      ↓
 Structured text output
      ↓
-Send to claude-3.5-sonnet for topic analysis
+Send to Gemini 1.5 Flash (text analysis)
      ↓
 JSON: { topics, frequency, difficulty, yearWise, studyPlan }
 ```
 
-### Core AI Utility
-```js
-// src/utils/callAI.js
-export async function callAI(messages, model = "anthropic/claude-3.5-sonnet") {
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${import.meta.env.VITE_OPENROUTER_KEY}`,
-      "Content-Type": "application/json",
-      "HTTP-Referer": "http://localhost:5173",
-    },
-    body: JSON.stringify({ model, messages, max_tokens: 4000 })
-  });
-  const data = await res.json();
-  return data.choices[0].message.content;
-}
-```
+### AI Utilities
+- `src/utils/visionAI.js` — Gemini 1.5 Flash (`VITE_GEMINI_KEY`). Image-only. Takes base64 JPEG, returns extracted text.
+- `src/utils/callAI.js` — Gemini 1.5 Flash (`VITE_GEMINI_KEY`). Text analysis only. Takes prompt + systemPrompt strings.
 
 ### Analysis Prompt Structure
 - System: expert exam analyst
@@ -150,7 +136,7 @@ export async function callAI(messages, model = "anthropic/claude-3.5-sonnet") {
 
 ## Environment Variables
 ```
-VITE_OPENROUTER_KEY=your_key_here
+VITE_GEMINI_KEY=your_gemini_key_here     ← Google AI Studio (vision + analysis)
 ```
 
 ---
@@ -164,6 +150,7 @@ VITE_OPENROUTER_KEY=your_key_here
 - [x] Dashboard wired to real AI data (stat cards, charts, topic grid, summary, syllabus gaps)
 - [x] Study planner wired to AI data (topic allocation, weekly calendar from sessions, regenerate plan)
 - [x] Syllabus page wired (donut coverage chart, gap cards, topic comparison bars)
+- [x] Data persistence (zustand persist middleware, localStorage, session notice, clear button)
 - [ ] README + demo video
 - [ ] GitHub pushed + Unstop submitted
 
@@ -172,9 +159,9 @@ VITE_OPENROUTER_KEY=your_key_here
 ## Agent Handoff Notes
 _(Update this section every 30–45 min when switching agents)_
 
-**Last updated:** 2026-05-03T14:15Z  
-**Last completed:** Full AI pipeline + data wiring complete. Created: `.env`, `src/utils/pdfToText.js` (text+vision dual extraction), `src/utils/analyzePapers.js` (Claude JSON analysis). Updated: `src/store/useAppStore.js` (added extractedTexts, syllabusText, analysisComplete, analysisProgress), `src/utils/callAI.js` (better error handling). Rewired all 4 app pages: Upload.jsx (real PDF extraction + AI analysis flow with progress), Dashboard.jsx (real data from store, skeleton/empty states, summary card, gaps section), Planner.jsx (real studyPlan sessions mapped to calendar, regenerate plan button, computed stats), Syllabus.jsx (donut chart, coverage bars, gap cards). All pages handle loading/error/empty states. No styling was changed.  
-**Currently working on:** Nothing — all AI pipeline steps complete. Next: README + demo video + deploy.  
-**Known issues / blockers:** PageWrapper uses fixed marginLeft:260 — if sidebar collapse width changes, update here too. `.env` key must be set to a real OpenRouter key before AI features work. pdfjs-dist v5 worker URL uses v3.11.174 CDN — may need version alignment if PDF parsing fails.  
-**Files modified last:** .env, .gitignore, src/utils/callAI.js, src/utils/pdfToText.js, src/utils/analyzePapers.js, src/store/useAppStore.js, src/pages/Upload.jsx, src/pages/Dashboard.jsx, src/pages/Planner.jsx, src/pages/Syllabus.jsx
+**Last updated:** 2026-05-03T16:15Z  
+**Last completed:** Data persistence via zustand `persist` middleware. Store renamed: `darkMode→isDark`, `toggleDarkMode→toggleTheme`, `papersFiles→uploadedFilesMetadata`, `syllabusFile→syllabusMetadata`, `setAnalyzing→setIsAnalyzing`. Upload page uses dual state: local `useState` for File objects (session-only) + zustand for serializable metadata. Session notice shown when metadata exists but no local files. Clear All Data button added. Dashboard/Syllabus/TopBar/App.jsx updated to new store API. `extractedTexts` + `analysisData` persist across refresh.  
+**Currently working on:** Nothing — persistence complete. Next: README + demo video + deploy.  
+**Known issues / blockers:** PageWrapper uses fixed marginLeft:260. pdfjs-dist v5 worker may need version alignment if PDF parsing fails.  
+**Files modified last:** src/store/useAppStore.js, src/pages/Upload.jsx, src/pages/Dashboard.jsx, src/pages/Syllabus.jsx, src/components/layout/TopBar.jsx, src/App.jsx, CLAUDE.md
 
