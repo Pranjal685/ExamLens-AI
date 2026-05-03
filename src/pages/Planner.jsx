@@ -122,92 +122,97 @@ export default function Planner() {
         </div>
       </div>
 
-      {/* SECTION 1: STUDY PRIORITY BOARD */}
-      <div style={{ marginBottom: 40 }}>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap: 20 }}>
-          {['HIGH', 'MEDIUM', 'LOW'].map((pLevel, colIdx) => {
-            const colTopics = studyPlan.filter(t => (t.priority || 'MEDIUM').toUpperCase() === pLevel)
-            const dotColor = DOT_COLOR[pLevel]
-            
-            return (
-              <div key={pLevel} style={{ display:'flex', flexDirection:'column', gap: 12 }}>
-                <div style={{ display:'flex', alignItems:'center', gap: 8, paddingBottom: 12, borderBottom:'1px solid var(--border)' }}>
-                  <div style={{ width:10, height:10, borderRadius:'50%', background: dotColor }} />
-                  <span style={{ fontSize:12, fontWeight:700, letterSpacing:'0.05em', color:'var(--text-2)' }}>{pLevel} PRIORITY</span>
+      {/* TWO COLUMN LAYOUT: KANBAN + DAILY SCHEDULE */}
+      <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
+
+        {/* LEFT SIDE: STUDY PRIORITY BOARD (55%) */}
+        <div style={{ width: '55%', flexShrink: 0 }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap: 16 }}>
+            {['HIGH', 'MEDIUM', 'LOW'].map((pLevel, colIdx) => {
+              const colTopics = studyPlan.filter(t => (t.priority || 'MEDIUM').toUpperCase() === pLevel)
+              const dotColor = DOT_COLOR[pLevel]
+              
+              return (
+                <div key={pLevel} style={{ display:'flex', flexDirection:'column', height: 'calc(100vh - 220px)', overflowY: 'auto', paddingRight: 4 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap: 8, paddingBottom: 12, marginBottom: 12, borderBottom:'1px solid var(--border)', position: 'sticky', top: 0, background: 'var(--bg)', zIndex: 10 }}>
+                    <div style={{ width:10, height:10, borderRadius:'50%', background: dotColor }} />
+                    <span style={{ fontSize:12, fontWeight:700, letterSpacing:'0.05em', color:'var(--text-2)' }}>{pLevel} PRIORITY</span>
+                  </div>
+                  
+                  <div style={{ display:'flex', flexDirection:'column', gap: 8 }}>
+                    {colTopics.map((t, i) => (
+                      <motion.div key={t.topic}
+                        initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay: colIdx * 0.1 + i * 0.05 }}
+                        whileHover={{ y:-2, borderColor: 'var(--border-2)', transition: { duration: 0.15 } }}
+                        style={{
+                          background:'var(--bg-card)', borderRadius:12, border:'1px solid var(--border)',
+                          padding: '12px 16px', display:'flex', alignItems:'center', justifyContent:'space-between', gap: 12,
+                          transition: 'border-color 0.15s ease'
+                        }}
+                      >
+                        <h3 style={{ fontSize:13, fontWeight:500, color:'var(--text-1)', lineHeight:1.3, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.topic}</h3>
+                        <div style={{ display:'flex', alignItems:'center', gap: 8, flexShrink: 0 }}>
+                          <span style={{ fontSize:12, fontWeight:600, color:'var(--text-2)', background:'var(--bg-card-2)', padding:'4px 10px', borderRadius:12 }}>
+                            {t.hoursPerWeek || 0}h
+                          </span>
+                          <span style={{ fontSize:11, fontWeight:600, color: dotColor, border:`1px solid ${dotColor}40`, background:`${dotColor}10`, padding:'3px 8px', borderRadius:6 }}>
+                            {pLevel}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                    {colTopics.length === 0 && (
+                      <div style={{ padding: 20, textAlign:'center', border:'1px dashed var(--border)', borderRadius:12 }}>
+                        <span style={{ fontSize:13, color:'var(--text-3)' }}>No topics</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT SIDE: DAILY STUDY SCHEDULE (45%) */}
+        <div style={{ width: '45%', flexShrink: 0, height: 'calc(100vh - 220px)', overflowY: 'auto', paddingRight: 4 }}>
+          <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:16, overflow:'hidden' }}>
+            {dailySchedule.map((dayObj, i) => (
+              <div key={dayObj.name} style={{ display:'flex', borderBottom: i < 6 ? '1px solid var(--border)' : 'none', minHeight: 64 }}>
+                {/* Left: Day Info */}
+                <div style={{ 
+                  width: 80, flexShrink:0, padding: 16, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                  borderRight: '1px solid var(--border)', background: i === TODAY ? 'rgba(245,158,11,0.04)' : 'transparent'
+                }}>
+                  <span style={{ fontSize:11, fontWeight:700, color: i === TODAY ? '#f59e0b' : 'var(--text-3)', letterSpacing:'0.05em' }}>{dayObj.short}</span>
+                  <span style={{ fontSize:20, fontWeight:700, color: i === TODAY ? '#f59e0b' : 'var(--text-1)' }}>{5 + i}</span>
                 </div>
                 
-                <div style={{ display:'flex', flexDirection:'column', gap: 12 }}>
-                  {colTopics.map((t, i) => (
-                    <motion.div key={t.topic}
-                      initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay: colIdx * 0.1 + i * 0.05 }}
-                      whileHover={{ y:-2, borderColor: 'var(--border-2)', transition: { duration: 0.15 } }}
-                      style={{
-                        background:'var(--bg-card)', borderRadius:12, border:'1px solid var(--border)',
-                        padding: 16, display:'flex', flexDirection:'column', gap: 16,
-                        transition: 'border-color 0.15s ease'
-                      }}
-                    >
-                      <h3 style={{ fontSize:14, fontWeight:600, color:'var(--text-1)', lineHeight:1.4 }}>{t.topic}</h3>
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                        <span style={{ fontSize:12, fontWeight:600, color:'var(--text-2)', background:'var(--bg-card-2)', padding:'4px 10px', borderRadius:12 }}>
-                          {t.hoursPerWeek || 0}h
-                        </span>
-                        <span style={{ fontSize:11, fontWeight:600, color:'var(--text-3)', border:'1px solid var(--border)', padding:'3px 8px', borderRadius:6 }}>
-                          {(t.difficulty || 'Medium').toUpperCase()}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                  {colTopics.length === 0 && (
-                    <div style={{ padding: 20, textAlign:'center', border:'1px dashed var(--border)', borderRadius:12 }}>
-                      <span style={{ fontSize:13, color:'var(--text-3)' }}>No topics</span>
-                    </div>
+                {/* Right: Chips */}
+                <div style={{ flex: 1, padding: 16, display:'flex', flexWrap:'wrap', gap: 10, alignItems:'center' }}>
+                  {dayObj.events.length > 0 ? (
+                    dayObj.events.map((evt, idx) => (
+                      <motion.div key={idx}
+                        initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }} transition={{ delay: 0.2 + i * 0.05 + idx * 0.05 }}
+                        whileHover={{ scale: 1.02 }}
+                        style={{
+                          display:'flex', alignItems:'center', gap: 8,
+                          background:'var(--bg-card-2)', border:'1px solid var(--border)', borderLeft:`3px solid ${evt.border}`,
+                          borderRadius: 8, padding: '8px 12px', cursor:'default'
+                        }}
+                      >
+                        <span style={{ fontSize:13, fontWeight:600, color:'var(--text-1)', maxWidth: 200, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{evt.topic}</span>
+                        <span style={{ fontSize:12, fontWeight:500, color:'var(--text-3)' }}>{evt.duration}h</span>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <span style={{ fontSize:13, color:'var(--text-3)', fontStyle:'italic' }}>Rest day</span>
                   )}
                 </div>
               </div>
-            )
-          })}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* SECTION 2: DAILY STUDY SCHEDULE */}
-      <div>
-        <div style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:16, overflow:'hidden' }}>
-          {dailySchedule.map((dayObj, i) => (
-            <div key={dayObj.name} style={{ display:'flex', borderBottom: i < 6 ? '1px solid var(--border)' : 'none', minHeight: 64 }}>
-              {/* Left: Day Info */}
-              <div style={{ 
-                width: 80, flexShrink:0, padding: 16, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-                borderRight: '1px solid var(--border)', background: i === TODAY ? 'rgba(245,158,11,0.04)' : 'transparent'
-              }}>
-                <span style={{ fontSize:11, fontWeight:700, color: i === TODAY ? '#f59e0b' : 'var(--text-3)', letterSpacing:'0.05em' }}>{dayObj.short}</span>
-                <span style={{ fontSize:20, fontWeight:700, color: i === TODAY ? '#f59e0b' : 'var(--text-1)' }}>{5 + i}</span>
-              </div>
-              
-              {/* Right: Chips */}
-              <div style={{ flex: 1, padding: 16, display:'flex', flexWrap:'wrap', gap: 10, alignItems:'center' }}>
-                {dayObj.events.length > 0 ? (
-                  dayObj.events.map((evt, idx) => (
-                    <motion.div key={idx}
-                      initial={{ opacity:0, scale:0.95 }} animate={{ opacity:1, scale:1 }} transition={{ delay: 0.2 + i * 0.05 + idx * 0.05 }}
-                      whileHover={{ scale: 1.02 }}
-                      style={{
-                        display:'flex', alignItems:'center', gap: 8,
-                        background:'var(--bg-card-2)', border:'1px solid var(--border)', borderLeft:`3px solid ${evt.border}`,
-                        borderRadius: 8, padding: '8px 12px', cursor:'default'
-                      }}
-                    >
-                      <span style={{ fontSize:13, fontWeight:600, color:'var(--text-1)', maxWidth: 200, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{evt.topic}</span>
-                      <span style={{ fontSize:12, fontWeight:500, color:'var(--text-3)' }}>{evt.duration}h</span>
-                    </motion.div>
-                  ))
-                ) : (
-                  <span style={{ fontSize:13, color:'var(--text-3)', fontStyle:'italic' }}>Rest day</span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* BOTTOM STATS — grid-cols-3 */}
