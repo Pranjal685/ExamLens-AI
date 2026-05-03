@@ -1,7 +1,4 @@
-/**
- * Analysis engine — sends extracted paper texts + syllabus to Claude
- * and returns structured JSON with topics, trends, gaps, and study plan.
- */
+import { callAI } from './callAI'
 
 export async function analyzePapers(extractedTexts, syllabusText = '') {
   const combinedPapers = extractedTexts
@@ -72,19 +69,11 @@ ${syllabusText || 'No syllabus provided — analyze papers only'}
 
 Return ONLY the JSON. No explanation. No markdown fences.`
 
-  const { callAI } = await import('./callAI')
-  const raw = await callAI(
-    [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    'anthropic/claude-3.5-sonnet'
-  )
+  const raw = await callAI(userPrompt, systemPrompt)
 
   try {
     return JSON.parse(raw)
   } catch {
-    // Try to extract JSON from response if it contains extra text
     const match = raw.match(/\{[\s\S]*\}/)
     if (match) return JSON.parse(match[0])
     throw new Error('Failed to parse AI response as JSON')
