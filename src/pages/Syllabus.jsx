@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import PageWrapper from '../components/layout/PageWrapper'
 import useAppStore from '../store/useAppStore'
 
-const BRAND = '#0ea5e9'
+const BRAND = 'var(--brand)'
 
 function EmptySyllabus() {
   return (
@@ -19,7 +19,7 @@ function EmptySyllabus() {
           Upload your official course syllabus to see which topics are covered, which are missing, and where to focus your revision.
         </p>
         <Link to="/app/upload"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--brand)', color: '#fff', padding: '0.8rem 1.75rem', borderRadius: 9999, fontWeight: 700, textDecoration: 'none', fontSize: '0.9rem', boxShadow: '0 0 20px rgba(14,165,233,0.3)' }}>
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--brand)', color: 'var(--brand-text)', padding: '0.8rem 1.75rem', borderRadius: 9999, fontWeight: 600, textDecoration: 'none', fontSize: '0.9rem' }}>
           <UploadCloud size={18} /> Upload Syllabus PDF
         </Link>
       </motion.div>
@@ -37,7 +37,7 @@ function NoSyllabusPrompt() {
         <p style={{ fontSize:'0.82rem', color:'var(--text-3)', marginTop:4 }}>Upload your syllabus PDF on the Upload page to compare against your exam papers.</p>
       </div>
       <Link to="/app/upload"
-        style={{ display:'inline-flex', alignItems:'center', gap:6, background:BRAND, color:'#fff', padding:'0.5rem 1.2rem', borderRadius:9999, fontWeight:600, textDecoration:'none', fontSize:'0.82rem', flexShrink:0 }}>
+        style={{ display:'inline-flex', alignItems:'center', gap:6, background:BRAND, color:'var(--brand-text)', padding:'0.5rem 1.2rem', borderRadius:9999, fontWeight:600, textDecoration:'none', fontSize:'0.82rem', flexShrink:0 }}>
         Upload Syllabus
       </Link>
     </motion.div>
@@ -67,7 +67,7 @@ export default function Syllabus() {
     { name: 'Covered', value: coverage },
     { name: 'Gaps', value: 100 - coverage },
   ]
-  const PIE_COLORS = ['#10b981', '#ef4444']
+  const PIE_COLORS = ['#ef4444', 'var(--bg-card-2)']
 
   return (
     <PageWrapper title="Syllabus">
@@ -93,6 +93,7 @@ export default function Syllabus() {
                     endAngle={-270}
                     dataKey="value"
                     animationDuration={800}
+                    stroke="none"
                   >
                     {pieData.map((_, idx) => (
                       <Cell key={idx} fill={PIE_COLORS[idx]} />
@@ -107,6 +108,19 @@ export default function Syllabus() {
                 <p style={{ fontSize:12, color:'var(--text-3)', marginTop:4 }}>Coverage</p>
               </div>
             </div>
+            
+            <div style={{ display:'flex', gap:16, marginTop:24 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <div style={{ width:10, height:10, borderRadius:'50%', background:'#ef4444' }} />
+                <span style={{ fontSize:13, color:'var(--text-2)' }}>Topics Covered</span>
+                <span style={{ fontSize:14, fontWeight:700, color:'var(--text-1)' }}>{coveredTopics}</span>
+              </div>
+              <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+                <div style={{ width:10, height:10, borderRadius:'50%', background:'var(--bg-card-2)' }} />
+                <span style={{ fontSize:13, color:'var(--text-2)' }}>Gaps Found</span>
+                <span style={{ fontSize:14, fontWeight:700, color:'var(--text-1)' }}>{uncoveredTopics}</span>
+              </div>
+            </div>
           </motion.div>
 
           {/* Topics comparison bar */}
@@ -119,15 +133,15 @@ export default function Syllabus() {
               <div>
                 <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                    <CheckCircle2 size={16} color="#10b981" />
+                    <CheckCircle2 size={16} color="var(--text-1)" />
                     <span style={{ fontSize:'0.88rem', fontWeight:600, color:'var(--text-1)' }}>Topics Found in Papers</span>
                   </div>
-                  <span style={{ fontSize:'0.88rem', fontWeight:700, color:'#10b981' }}>{coveredTopics}</span>
+                  <span style={{ fontSize:'0.88rem', fontWeight:600, color:'var(--text-1)' }}>{coveredTopics}</span>
                 </div>
-                <div style={{ height:10, borderRadius:5, background:'var(--bg-card-2)', overflow:'hidden' }}>
+                <div style={{ height:6, borderRadius:3, background:'var(--bg-card-2)', overflow:'hidden' }}>
                   <motion.div
                     initial={{ width:0 }} animate={{ width:`${coverage}%` }} transition={{ duration:1, delay:0.2 }}
-                    style={{ height:'100%', borderRadius:5, background:'#10b981' }}
+                    style={{ height:'100%', borderRadius:3, background:'#ef4444' }}
                   />
                 </div>
               </div>
@@ -136,15 +150,15 @@ export default function Syllabus() {
               <div>
                 <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
                   <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                    <AlertTriangle size={16} color="#ef4444" />
+                    <AlertTriangle size={16} color="#f59e0b" />
                     <span style={{ fontSize:'0.88rem', fontWeight:600, color:'var(--text-1)' }}>Syllabus Gaps</span>
                   </div>
-                  <span style={{ fontSize:'0.88rem', fontWeight:700, color:'#ef4444' }}>{uncoveredTopics}</span>
+                  <span style={{ fontSize:'0.88rem', fontWeight:600, color:'var(--text-2)' }}>{uncoveredTopics}</span>
                 </div>
-                <div style={{ height:10, borderRadius:5, background:'var(--bg-card-2)', overflow:'hidden' }}>
+                <div style={{ height:6, borderRadius:3, background:'var(--bg-card-2)', overflow:'hidden' }}>
                   <motion.div
                     initial={{ width:0 }} animate={{ width:`${100 - coverage}%` }} transition={{ duration:1, delay:0.3 }}
-                    style={{ height:'100%', borderRadius:5, background:'#ef4444' }}
+                    style={{ height:'100%', borderRadius:3, background:'#f59e0b' }}
                   />
                 </div>
               </div>
@@ -170,9 +184,9 @@ export default function Syllabus() {
               {syllabusGaps.map((gap, i) => (
                 <motion.div key={i}
                   initial={{ opacity:0, x:-12 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.06 + 0.2 }}
-                  style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderLeft:'4px solid #f59e0b', borderRadius:12, padding:'14px 18px', display:'flex', alignItems:'center', gap:10 }}>
+                  style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderLeft:'3px solid #f59e0b', borderRadius:8, padding:'14px 18px', display:'flex', alignItems:'center', gap:10, height:'100%' }}>
                   <AlertTriangle size={16} color="#f59e0b" style={{ flexShrink:0 }} />
-                  <p style={{ fontSize:'0.88rem', color:'var(--text-2)', fontWeight:500 }}>{gap}</p>
+                  <p style={{ fontSize:'0.88rem', color:'var(--text-1)', fontWeight:600 }}>{gap}</p>
                 </motion.div>
               ))}
             </div>

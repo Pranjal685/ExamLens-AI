@@ -159,8 +159,20 @@ VITE_GEMINI_KEY=your_gemini_key_here     ← Google AI Studio (vision + analysis
 ## Agent Handoff Notes
 _(Update this section every 30–45 min when switching agents)_
 
-**Last updated:** 2026-05-03T15:30Z  
-**Last completed:** Performance: parallelized PDF extraction pipeline. pdfToText.js now extracts text from all pages via Promise.all, separates text vs image pages, batches vision calls (5 at a time), caps at 15 pages per PDF, truncates output to 8000 chars, uses scale 1.5 + JPEG 0.7 for smaller payloads. Upload.jsx processes all PDFs simultaneously via Promise.all instead of sequential loop. visionAI.js + callAI.js have defensive Gemini response parsing (handles empty candidates, RECITATION finishReason, etc.).  
-**Currently working on:** Nothing — parallelization complete. Next: README + demo video + deploy.  
-**Known issues / blockers:** PageWrapper uses fixed marginLeft:260. pdfjs-dist v5 worker may need version alignment if PDF parsing fails. Gemini may return RECITATION for copyrighted content pages (handled gracefully, returns empty string).  
-**Files modified last:** src/utils/pdfToText.js, src/pages/Upload.jsx, src/utils/visionAI.js, src/utils/callAI.js, claude.md
+**Last updated:** 2026-05-03T15:45Z
+**Last completed:** Design Polish (Premium Minimal Luxury). Overhauled the entire UI to match the sophisticated, minimal aesthetics of Linear, Resend, Raycast, and Vercel. 
+- **Philosophy applied**: Extreme restraint. Deep achromatic darks, high-contrast typography, and 1px translucent borders to define structure without visual weight.
+- **Removed**: Colorful pastel stat card backgrounds (mint, yellow, peach), heavy box-shadows, generic "brand" colored backgrounds, and bouncy/floating animations. They felt too "Bootstrap" and cheap.
+- **Added**: A highly refined grayscale palette (`var(--bg)`, `var(--bg-card)`, `var(--bg-card-2)`), subtle micro-interactions (opacity shifts, slight scaling), and unified stark contrast accents (`BRAND` is now purely black/white depending on the theme). 
+- **Animations chosen**: Fast, easing-driven fades and snappy micro-interactions. The focus is on making it feel like a high-performance tool, not a toy.
+- **Changes**: Updated `index.css` with the design brief and new variables. Removed pastel colors, large shadows, and float animations across `Landing.jsx`, `Dashboard.jsx`, `Upload.jsx`, `Planner.jsx`, `Syllabus.jsx`, and `Sidebar.jsx`. Dark mode remains the default, but light mode CSS variables were also updated to maintain a crisp "Vercel" style aesthetic.
+
+**Last updated:** 2026-05-03T16:15Z
+**Last completed:**
+1. **Study Planner Restructure**: Overhauled `Planner.jsx` to match Metric Flow design, using dot colors for priority allocation, tinted backgrounds with left borders for events, clean calendar grid without borders for empty cells, and warm stat cards at the bottom.
+2. **Syllabus Donut Chart Fix**: Updated donut chart in `Syllabus.jsx` to use accent color for coverage and muted color for gaps. Added a legend, adjusted progress bars, and styled gap topics with warning colors.
+3. **Sidebar Actions**: Built custom Framer Motion modals in `Sidebar.jsx` for Preferences, Help (expandable FAQ), and Logout (confirmation dialog).
+
+**Currently working on:** Next steps: README + demo video + deploy.  
+**Known issues / blockers:** None currently.
+**Files modified last:** src/pages/Planner.jsx, src/pages/Syllabus.jsx, src/components/layout/Sidebar.jsx, claude.md

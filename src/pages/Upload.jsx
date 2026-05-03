@@ -7,7 +7,7 @@ import useAppStore from '../store/useAppStore'
 import { extractTextFromPDF } from '../utils/pdfToText'
 import { analyzePapers } from '../utils/analyzePapers'
 
-const BRAND = '#0ea5e9'
+const BRAND = 'var(--brand)'
 const SUBJECTS = ['Physics', 'Chemistry', 'Mathematics', 'Biology', 'History', 'Economics', 'Computer Science']
 
 function ShimmerBlock({ h = 14 }) {
@@ -178,13 +178,13 @@ export default function Upload() {
         <AnimatePresence>
           {staleSession && (
             <motion.div initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-              style={{ marginBottom:16, background:'#fef3c7', border:'1px solid #fcd34d', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', gap:10 }}>
-              <RefreshCw size={15} color="#92400e" style={{ flexShrink:0 }} />
-              <p style={{ fontSize:'0.82rem', color:'#92400e', flex:1 }}>
+              style={{ marginBottom:16, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, padding:'12px 16px', display:'flex', alignItems:'center', gap:10 }}>
+              <RefreshCw size={15} color="var(--text-2)" style={{ flexShrink:0 }} />
+              <p style={{ fontSize:'0.82rem', color:'var(--text-1)', flex:1 }}>
                 Previous session files shown — re-upload to re-analyze
               </p>
               <button onClick={handleClearAll} style={{ background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>
-                <X size={14} color="#92400e" />
+                <X size={14} color="var(--text-2)" />
               </button>
             </motion.div>
           )}
@@ -201,14 +201,14 @@ export default function Upload() {
             onClick={() => fileInputRef.current.click()}
           >
             <input ref={fileInputRef} type="file" accept=".pdf" multiple hidden onChange={handleFileInput} />
-            <div style={{ width:56, height:56, borderRadius:14, background:`rgba(14,165,233,0.12)`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-              <UploadCloud size={28} color={BRAND} />
+            <div style={{ width:56, height:56, borderRadius:12, background:'var(--bg-card-2)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <UploadCloud size={24} color="var(--text-1)" />
             </div>
             <p style={{ fontWeight:600, fontSize:20, color:'var(--text-1)' }}>Drop your PDF papers here</p>
             <p style={{ fontSize:14, color:'var(--text-3)', textAlign:'center' }}>Supports PDF files up to 50MB · Multiple files allowed</p>
             <button
               onClick={e => { e.stopPropagation(); fileInputRef.current.click() }}
-              style={{ background:BRAND, color:'#fff', padding:'0.6rem 1.5rem', borderRadius:10, fontWeight:500, fontSize:'0.875rem', border:'none', cursor:'pointer' }}
+              style={{ background:BRAND, color:'var(--brand-text)', padding:'0.6rem 1.5rem', borderRadius:8, fontWeight:600, fontSize:'0.875rem', border:'none', cursor:'pointer' }}
             >Browse Files</button>
           </div>
         </motion.div>
@@ -224,8 +224,8 @@ export default function Upload() {
               {displayFiles.map((f) => (
                 <motion.div key={f.id} layout initial={{ opacity:0, x:-16 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:16 }}
                   style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'center', gap:12, opacity: staleSession ? 0.7 : 1 }}>
-                  <div style={{ width:36, height:36, borderRadius:8, background:'#fee2e2', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                    <FileText size={17} color="#ef4444" />
+                  <div style={{ width:36, height:36, borderRadius:8, background:'var(--bg-card-2)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <FileText size={17} color="var(--text-1)" />
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
                     <p style={{ fontWeight:600, fontSize:'0.875rem', color:'var(--text-1)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{f.name}</p>
@@ -234,11 +234,11 @@ export default function Upload() {
                   {!staleSession && (
                     <>
                       <select value={f.year} onChange={e => updateFile(f.id, { year:e.target.value })}
-                        style={{ background:'#fef3c7', color:'#92400e', border:'none', borderRadius:9999, padding:'0.2rem 0.55rem', fontSize:'0.72rem', fontWeight:600, cursor:'pointer', outline:'none' }}>
+                        style={{ background:'var(--bg-card-2)', color:'var(--text-1)', border:'1px solid var(--border)', borderRadius:4, padding:'0.2rem 0.55rem', fontSize:'0.72rem', fontWeight:500, cursor:'pointer', outline:'none' }}>
                         {years.map(y => <option key={y}>{y}</option>)}
                       </select>
                       <select value={f.subject} onChange={e => updateFile(f.id, { subject:e.target.value })}
-                        style={{ background:'rgba(14,165,233,0.12)', color:BRAND, border:'none', borderRadius:9999, padding:'0.2rem 0.55rem', fontSize:'0.72rem', fontWeight:600, cursor:'pointer', outline:'none' }}>
+                        style={{ background:'var(--bg-card-2)', color:'var(--text-1)', border:'1px solid var(--border)', borderRadius:4, padding:'0.2rem 0.55rem', fontSize:'0.72rem', fontWeight:500, cursor:'pointer', outline:'none' }}>
                         {SUBJECTS.map(s => <option key={s}>{s}</option>)}
                       </select>
                       <button onClick={() => removeFile(f.id)} style={{ width:28, height:28, borderRadius:'50%', background:'var(--bg-card-2)', border:'none', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -260,8 +260,8 @@ export default function Upload() {
             <Info size={13} style={{ color:'var(--text-3)' }} title="Enables AI syllabus gap analysis" />
           </div>
           {(localSyllabus || syllabusMetadata) ? (
-            <div style={{ display:'flex', alignItems:'center', gap:10, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:12, padding:'12px 16px' }}>
-              <FileText size={17} color={BRAND} />
+            <div style={{ display:'flex', alignItems:'center', gap:10, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, padding:'12px 16px' }}>
+              <FileText size={17} color="var(--text-1)" />
               <span style={{ flex:1, fontSize:'0.875rem', color:'var(--text-1)' }}>{(localSyllabus || syllabusMetadata).name}</span>
               {!staleSession && (
                 <button onClick={removeSyllabus} style={{ background:'none', border:'none', cursor:'pointer' }}><X size={14} style={{ color:'var(--text-3)' }} /></button>
@@ -270,10 +270,10 @@ export default function Upload() {
           ) : (
             <div className="drop-zone" style={{ minHeight:160, cursor:'pointer' }} onClick={() => syllabusRef.current.click()}>
               <input ref={syllabusRef} type="file" accept=".pdf" hidden onChange={handleSyllabus} />
-              <UploadCloud size={22} color={BRAND} />
+              <UploadCloud size={20} color="var(--text-2)" />
               <p style={{ fontSize:'0.875rem', color:'var(--text-2)', fontWeight:500 }}>Drop your syllabus PDF here</p>
               <button onClick={e => { e.stopPropagation(); syllabusRef.current.click() }}
-                style={{ background:'transparent', border:`1.5px solid ${BRAND}`, color:BRAND, padding:'0.3rem 1rem', borderRadius:9999, fontSize:'0.78rem', fontWeight:600, cursor:'pointer' }}>
+                style={{ background:'var(--bg-card-2)', border:`1px solid var(--border)`, color:'var(--text-1)', padding:'0.3rem 1rem', borderRadius:6, fontSize:'0.78rem', fontWeight:600, cursor:'pointer' }}>
                 Browse
               </button>
             </div>
@@ -304,13 +304,13 @@ export default function Upload() {
             whileHover={canAnalyze ? { scale:1.01 } : {}}
             whileTap={canAnalyze ? { scale:0.99 } : {}}
             style={{
-              width:'100%', padding:'1.1rem', borderRadius:16,
-              background: canAnalyze ? BRAND : 'var(--bg-card)',
-              color: canAnalyze ? '#fff' : 'var(--text-3)',
-              border:'none', cursor: canAnalyze ? 'pointer' : 'not-allowed',
-              fontWeight:600, fontSize:18, display:'flex', alignItems:'center', justifyContent:'center', gap:10,
-              boxShadow: canAnalyze ? `0 4px 24px rgba(14,165,233,0.35)` : 'none',
-              transition:'background .2s, box-shadow .2s',
+              width:'100%', padding:'1rem', borderRadius:8,
+              background: canAnalyze ? BRAND : 'var(--bg-card-2)',
+              color: canAnalyze ? 'var(--brand-text)' : 'var(--text-3)',
+              border: canAnalyze ? 'none' : '1px solid var(--border)', cursor: canAnalyze ? 'pointer' : 'not-allowed',
+              fontWeight:600, fontSize:16, display:'flex', alignItems:'center', justifyContent:'center', gap:10,
+              boxShadow: 'none',
+              transition:'background .2s',
             }}
           >
             {isAnalyzing ? <><Loader2 size={20} className="animate-spin" /> Analyzing…</> : <>Analyze Now <ArrowRight size={20} /></>}
@@ -333,8 +333,8 @@ export default function Upload() {
                 <motion.div key={step} initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay: i * 0.8 }}
                   style={{ display:'flex', alignItems:'center', gap:10 }}>
                   <div style={{ width:6, height:6, borderRadius:'50%', background:BRAND, flexShrink:0 }} />
+                  <span style={{ fontSize:'0.85rem', color:'var(--text-1)', whiteSpace:'nowrap', width:180 }}>{step}</span>
                   <ShimmerBlock />
-                  <span style={{ fontSize:'0.8rem', color:'var(--text-3)', whiteSpace:'nowrap' }}>{step}</span>
                 </motion.div>
               ))}
               <div style={{ display:'flex', flexDirection:'column', gap:6, marginTop:4 }}>

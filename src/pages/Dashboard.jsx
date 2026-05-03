@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import PageWrapper from '../components/layout/PageWrapper'
 import useAppStore from '../store/useAppStore'
 
-const BRAND = '#0ea5e9'
+const BRAND = 'var(--brand)'
 const LEVEL_COLOR = { HIGH:'#ef4444', high:'#ef4444', MEDIUM:'#f59e0b', medium:'#f59e0b', LOW:'#10b981', low:'#10b981' }
 
 const fadeUp = { hidden:{ opacity:0, y:20 }, show:{ opacity:1, y:0, transition:{ duration:0.4 } } }
@@ -64,7 +64,7 @@ function EmptyDashboard() {
           Upload your past exam papers and run the AI analysis to see topic frequencies, trends, and importance scores here.
         </p>
         <Link to="/app/upload"
-          style={{ display:'inline-flex', alignItems:'center', gap:8, background:BRAND, color:'#fff', padding:'0.8rem 1.75rem', borderRadius:9999, fontWeight:700, textDecoration:'none', fontSize:'0.9rem', boxShadow:'0 0 20px rgba(14,165,233,0.3)' }}>
+          style={{ display:'inline-flex', alignItems:'center', gap:8, background:BRAND, color:'var(--brand-text)', padding:'0.8rem 1.75rem', borderRadius:9999, fontWeight:600, textDecoration:'none', fontSize:'0.9rem' }}>
           <FileText size={18} /> Upload Papers
         </Link>
       </motion.div>
@@ -103,10 +103,10 @@ export default function Dashboard() {
   const summary = data.summary || ''
 
   const STATS = [
-    { icon:Brain,    bg:'#d1fae5', fg:'#065f46', val: String(data.totalTopics || topics.length),             label:'Topics Analyzed' },
-    { icon:Flame,    bg:'#fef3c7', fg:'#92400e', val: String(data.highPriorityCount || topics.filter(t => t.priority === 'HIGH').length), label:'High Priority Topics' },
-    { icon:FileText, bg:'#ede9fe', fg:'#4c1d95', val: String(uploadedFilesMetadata.length),                  label:'Papers Analyzed' },
-    { icon:Target,   bg:'#ffe4e6', fg:'#881337', val: `${data.overallCoverage || 0}%`,                       label:'Syllabus Coverage' },
+    { icon:Brain,    val: String(data.totalTopics || topics.length),             label:'Topics Analyzed' },
+    { icon:Flame,    val: String(data.highPriorityCount || topics.filter(t => t.priority === 'HIGH').length), label:'High Priority Topics' },
+    { icon:FileText, val: String(uploadedFilesMetadata.length),                  label:'Papers Analyzed' },
+    { icon:Target,   val: `${data.overallCoverage || 0}%`,                       label:'Syllabus Coverage' },
   ]
 
   return (
@@ -116,27 +116,26 @@ export default function Dashboard() {
         {/* SUMMARY CARD */}
         {summary && (
           <motion.div initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.4 }}
-            style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderLeft:`4px solid ${BRAND}`, borderRadius:16, padding:'18px 22px', display:'flex', alignItems:'flex-start', gap:12 }}>
-            <Info size={18} color={BRAND} style={{ flexShrink:0, marginTop:2 }} />
+            style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderLeft:`4px solid var(--text-2)`, borderRadius:12, padding:'18px 22px', display:'flex', alignItems:'flex-start', gap:12 }}>
+            <Info size={18} color="var(--text-1)" style={{ flexShrink:0, marginTop:2 }} />
             <p style={{ fontSize:'0.9rem', color:'var(--text-2)', lineHeight:1.6 }}>{summary}</p>
           </motion.div>
         )}
 
         {/* STAT CARDS — grid-cols-4 */}
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16 }}>
-          {STATS.map(({ icon: Icon, bg, fg, val, label }, i) => (
+          {STATS.map(({ icon: Icon, val, label }, i) => (
             <motion.div key={label}
               initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} transition={{ delay: i * 0.08 }}
-              whileHover={{ y:-3, transition:{ duration:0.15 } }}
-              style={{ background:bg, borderRadius:16, padding:'24px', display:'flex', flexDirection:'column', gap:12, height:'100%' }}
+              className="stat-card"
+              whileHover={{ y:-2 }}
             >
-              {/* Icon with tinted bg */}
-              <div style={{ width:36, height:36, borderRadius:10, background: fg + '28', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                <Icon size={20} color={fg} />
+              <div className="stat-icon-wrap">
+                <Icon size={16} />
               </div>
-              <div>
-                <p style={{ fontSize:36, fontWeight:700, lineHeight:1, color:fg }}>{val}</p>
-                <p style={{ fontSize:14, color:fg, opacity:0.7, marginTop:4 }}>{label}</p>
+              <div style={{ marginTop: 8 }}>
+                <p style={{ fontSize:32, fontWeight:700, lineHeight:1, color:'var(--text-1)' }}>{val}</p>
+                <p style={{ fontSize:13, color:'var(--text-3)', marginTop:4, fontWeight:500 }}>{label}</p>
               </div>
             </motion.div>
           ))}
@@ -152,8 +151,8 @@ export default function Dashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="topic" tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, fontSize:12 }} cursor={{ fill:'rgba(14,165,233,0.06)' }} />
-                <Bar dataKey="count" fill={BRAND} radius={[4,4,0,0]} animationDuration={800} animationBegin={0} />
+                <Tooltip contentStyle={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, fontSize:12 }} cursor={{ fill:'var(--bg-hover)' }} />
+                <Bar dataKey="count" fill="var(--text-1)" radius={[2,2,0,0]} animationDuration={800} animationBegin={0} />
               </BarChart>
             </ResponsiveContainer>
           </motion.div>
@@ -167,7 +166,7 @@ export default function Dashboard() {
                 <XAxis dataKey="year" tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize:10, fill:'var(--text-3)' }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:8, fontSize:12 }} />
-                <Line type="monotone" dataKey="topics" stroke="#10b981" strokeWidth={2.5} dot={{ fill:'#10b981', r:4 }} activeDot={{ r:6 }} animationDuration={800} animationBegin={0} />
+                <Line type="monotone" dataKey="topics" stroke="var(--text-2)" strokeWidth={2} dot={{ fill:'var(--bg-card)', stroke:'var(--text-2)', strokeWidth:2, r:3 }} activeDot={{ r:5, fill:'var(--text-1)', stroke:'var(--text-1)' }} animationDuration={800} animationBegin={0} />
               </LineChart>
             </ResponsiveContainer>
           </motion.div>
@@ -181,16 +180,14 @@ export default function Dashboard() {
               const level = priority?.toLowerCase() || 'medium'
               return (
                 <motion.div key={name}
-                  initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay: i * 0.06 + 0.2 }}
-                  whileHover={{ y:-2, transition:{ duration:0.2 } }}
+                  initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay: i * 0.06 + 0.2 }}
+                  whileHover={{ y:-2, borderColor:'var(--border-2)', background:'var(--bg-hover)', transition:{ duration:0.2 } }}
                   style={{
-                    background:'var(--bg-card)', borderRadius:16, padding:20,
+                    background:'var(--bg-card)', borderRadius:12, padding:20,
                     border:`1px solid var(--border)`,
-                    borderLeft:`4px solid ${LEVEL_COLOR[level] || '#f59e0b'}`,
-                    cursor:'default', transition:'box-shadow .2s',
+                    borderLeft:`3px solid ${LEVEL_COLOR[level] || 'var(--text-2)'}`,
+                    cursor:'default', transition:'background .2s, border-color .2s',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.boxShadow='0 8px 28px rgba(0,0,0,0.2)'}
-                  onMouseLeave={e => e.currentTarget.style.boxShadow='none'}
                 >
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 }}>
                     <p style={{ fontWeight:600, fontSize:15, color:'var(--text-1)' }}>{name}</p>
@@ -204,12 +201,12 @@ export default function Dashboard() {
                     />
                   </div>
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                    <div style={{ display:'flex', gap:4, flexWrap:'wrap', alignItems:'center' }}>
+                    <div style={{ display:'flex', gap:6, flexWrap:'wrap', alignItems:'center' }}>
                       {(years || []).map(y => (
-                        <span key={y} style={{ fontSize:'0.68rem', fontWeight:600, padding:'0.12rem 0.4rem', borderRadius:9999, background:'var(--bg-card-2)', color:'var(--text-3)' }}>{y}</span>
+                        <span key={y} style={{ fontSize:'0.65rem', fontWeight:500, padding:'0.1rem 0.35rem', borderRadius:4, background:'var(--bg-card-2)', border:'1px solid var(--border)', color:'var(--text-2)' }}>{y}</span>
                       ))}
                       {difficulty && (
-                        <span style={{ fontSize:'0.65rem', fontWeight:600, padding:'0.12rem 0.4rem', borderRadius:9999, background: difficulty === 'Hard' ? '#fef2f2' : difficulty === 'Medium' ? '#fef3c7' : '#d1fae5', color: difficulty === 'Hard' ? '#ef4444' : difficulty === 'Medium' ? '#f59e0b' : '#10b981' }}>
+                        <span style={{ fontSize:'0.65rem', fontWeight:500, padding:'0.1rem 0.35rem', borderRadius:4, background:'var(--bg-card-2)', border:'1px solid var(--border)', color:'var(--text-2)' }}>
                           {difficulty}
                         </span>
                       )}
