@@ -1,32 +1,91 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Download, RefreshCw, Clock, BookOpen, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, RefreshCw, Clock, BookOpen, Calendar, Loader2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import PageWrapper from '../components/layout/PageWrapper'
+import useAppStore from '../store/useAppStore'
+import { analyzePapers } from '../utils/analyzePapers'
 
 const BRAND = '#0ea5e9'
-
-const TOPICS = [
-  { name:'Thermodynamics',    level:'high',   hours:8, done:65 },
-  { name:'Organic Chemistry', level:'high',   hours:6, done:45 },
-  { name:'Calculus',          level:'medium', hours:5, done:30 },
-  { name:'Genetics',          level:'medium', hours:4, done:20 },
-  { name:'Vectors',           level:'low',    hours:3, done:60 },
-  { name:'Cell Biology',      level:'low',    hours:2, done:10 },
-]
+const DAYS_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 const HOURS = ['9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM']
-const EVENTS = [
-  { day:0, start:0, span:2, topic:'Thermodynamics', cls:'cal-coral' },
-  { day:1, start:1, span:2, topic:'Calculus',        cls:'cal-amber' },
-  { day:2, start:5, span:2, topic:'Thermodynamics', cls:'cal-coral' },
-  { day:3, start:6, span:2, topic:'Calculus',        cls:'cal-amber' },
-  { day:4, start:0, span:1, topic:'Vectors',         cls:'cal-green' },
-  { day:5, start:2, span:3, topic:'Review Session',  cls:'cal-indigo' },
-  { day:6, start:1, span:2, topic:'Genetics',        cls:'cal-amber' },
-]
-const DOT_COLOR = { high:'#ef4444', medium:'#f59e0b', low:'#10b981' }
+const HOUR_MAP = { '09:00':0, '10:00':1, '11:00':2, '12:00':3, '13:00':4, '14:00':5, '15:00':6, '16:00':7, '17:00':8, '18:00':9, '19:00':10, '20:00':11 }
+const DOT_COLOR = { HIGH:'#ef4444', MEDIUM:'#f59e0b', LOW:'#10b981', high:'#ef4444', medium:'#f59e0b', low:'#10b981' }
+const CLS_MAP = { HIGH:'cal-coral', MEDIUM:'cal-amber', LOW:'cal-green', high:'cal-coral', medium:'cal-amber', low:'cal-green' }
 const TODAY = 0
 
+function EmptyPlanner() {
+  return (
+    <div style={{ textAlign:'center', paddingTop:'6rem' }}>
+      <motion.div initial={{ opacity:0, y:24 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.45 }}>
+        <div style={{ width:72, height:72, borderRadius:'1.25rem', background:'rgba(14,165,233,0.12)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 1.5rem' }}>
+          <Calendar size={34} color={BRAND} />
+        </div>
+        <h2 style={{ fontWeight:800, fontSize:'1.75rem', color:'var(--text-1)', marginBottom:'0.75rem' }}>No Study Plan Yet</h2>
+        <p style={{ color:'var(--text-2)', fontSize:'1rem', lineHeight:1.65, marginBottom:'2rem', maxWidth:480, margin:'0 auto 2rem' }}>
+          Upload your past exam papers first to generate a personalized AI-powered study plan.
+        </p>
+        <Link to="/app/upload"
+          style={{ display:'inline-flex', alignItems:'center', gap:8, background:BRAND, color:'#fff', padding:'0.8rem 1.75rem', borderRadius:9999, fontWeight:700, textDecoration:'none', fontSize:'0.9rem', boxShadow:'0 0 20px rgba(14,165,233,0.3)' }}>
+          <BookOpen size={18} /> Upload Papers
+        </Link>
+      </motion.div>
+    </div>
+  )
+}
+
 export default function Planner() {
+  const { analysisData, extractedTexts, syllabusText, setAnalysisData } = useAppStore()
+  const [regenerating, setRegenerating] = useState(false)
+
+  // No data — show empty state
+  if (!analysisData || !analysisData.studyPlan) {
+    return (
+      <PageWrapper title="Smart Study Planner">
+        <EmptyPlanner />
+      </PageWrapper>
+    )
+  }
+
+  const studyPlan = analysisData.studyPlan || []
+
+  // Build calendar events from studyPlan sessions
+  const events = []
+  studyPlan.forEach((item, planIdx) => {
+    (item.sessions || []).forEach(session => {
+      const dayIdx = DAYS_FULL.indexOf(session.day)
+      const hourIdx = HOUR_MAP[session.startTime]
+      if (dayIdx >= 0 && hourIdx !== undefined) {
+        events.push({
+          day: dayIdx,
+          start: hourIdx,
+          span: session.duration || 1,
+          topic: item.topic,
+          cls: CLS_MAP[item.priority] || 'cal-amber',
+          color: item.color,
+        })
+      }
+    })
+  })
+
+  // Bottom stat values
+  const totalHours = studyPlan.reduce((sum, t) => sum + (t.hoursPerWeek || 0), 0)
+  const totalTopics = studyPlan.length
+
+  const handleRegenerate = async () => {
+    if (!extractedTexts || extractedTexts.length === 0) return
+    setRegenerating(true)
+    try {
+      const result = await analyzePapers(extractedTexts, syllabusText)
+      setAnalysisData(result)
+    } catch (err) {
+      console.error('Regenerate error:', err)
+    } finally {
+      setRegenerating(false)
+    }
+  }
+
   return (
     <PageWrapper title="Smart Study Planner">
 
@@ -45,8 +104,13 @@ export default function Planner() {
           <button style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, border:'1.5px solid var(--border)', background:'transparent', color:'var(--text-2)', fontWeight:600, fontSize:'0.82rem', cursor:'pointer' }}>
             <Download size={13} /> Export PDF
           </button>
-          <button style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, background:BRAND, color:'#fff', border:'none', fontWeight:600, fontSize:'0.82rem', cursor:'pointer' }}>
-            <RefreshCw size={13} /> Regenerate Plan
+          <button
+            onClick={handleRegenerate}
+            disabled={regenerating}
+            style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, background:BRAND, color:'#fff', border:'none', fontWeight:600, fontSize:'0.82rem', cursor: regenerating ? 'not-allowed' : 'pointer', opacity: regenerating ? 0.7 : 1 }}
+          >
+            {regenerating ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+            {regenerating ? 'Regenerating…' : 'Regenerate Plan'}
           </button>
         </div>
       </div>
@@ -71,26 +135,31 @@ export default function Planner() {
           </div>
 
           {/* Topic rows — consistent 48px height */}
-          {TOPICS.map(({ name, level, hours, done }, i) => (
-            <motion.div key={name}
-              initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.06 + 0.1 }}
-              style={{ minHeight:48, display:'flex', flexDirection:'column', justifyContent:'center', paddingBottom:10, borderBottom: i < TOPICS.length-1 ? '1px solid var(--border)' : 'none', marginBottom: i < TOPICS.length-1 ? 10 : 0 }}
-            >
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
-                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                  <div style={{ width:7, height:7, borderRadius:'50%', background:DOT_COLOR[level], flexShrink:0 }} />
-                  <span style={{ fontSize:'0.82rem', fontWeight:600, color:'var(--text-1)' }}>{name}</span>
+          {studyPlan.map(({ topic, priority, hoursPerWeek }, i) => {
+            const level = priority?.toLowerCase() || 'medium'
+            // Progress bar proportional to hours (max ~10h)
+            const pct = Math.min(100, ((hoursPerWeek || 0) / 10) * 100)
+            return (
+              <motion.div key={topic}
+                initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.06 + 0.1 }}
+                style={{ minHeight:48, display:'flex', flexDirection:'column', justifyContent:'center', paddingBottom:10, borderBottom: i < studyPlan.length-1 ? '1px solid var(--border)' : 'none', marginBottom: i < studyPlan.length-1 ? 10 : 0 }}
+              >
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                    <div style={{ width:7, height:7, borderRadius:'50%', background:DOT_COLOR[level] || '#f59e0b', flexShrink:0 }} />
+                    <span style={{ fontSize:'0.82rem', fontWeight:600, color:'var(--text-1)' }}>{topic}</span>
+                  </div>
+                  <span style={{ fontSize:'0.75rem', color:'var(--text-3)', fontWeight:500 }}>{hoursPerWeek}h</span>
                 </div>
-                <span style={{ fontSize:'0.75rem', color:'var(--text-3)', fontWeight:500 }}>{hours}h</span>
-              </div>
-              <div style={{ height:5, borderRadius:3, background:'var(--bg-card-2)' }}>
-                <motion.div
-                  initial={{ width:0 }} animate={{ width:`${done}%` }} transition={{ duration:0.7, delay: i * 0.06 + 0.2 }}
-                  style={{ height:'100%', borderRadius:3, background:DOT_COLOR[level] }}
-                />
-              </div>
-            </motion.div>
-          ))}
+                <div style={{ height:5, borderRadius:3, background:'var(--bg-card-2)' }}>
+                  <motion.div
+                    initial={{ width:0 }} animate={{ width:`${pct}%` }} transition={{ duration:0.7, delay: i * 0.06 + 0.2 }}
+                    style={{ height:'100%', borderRadius:3, background:DOT_COLOR[level] || '#f59e0b' }}
+                  />
+                </div>
+              </motion.div>
+            )
+          })}
         </motion.div>
 
         {/* RIGHT: WEEKLY SCHEDULE — flex-1 */}
@@ -125,7 +194,7 @@ export default function Planner() {
                   <span style={{ fontSize:'0.66rem', color:'var(--text-3)', whiteSpace:'nowrap' }}>{hr}</span>
                 </div>
                 {DAYS.map((_, di) => {
-                  const evt = EVENTS.find(e => e.day === di && e.start === hi)
+                  const evt = events.find(e => e.day === di && e.start === hi)
                   return (
                     <div key={di} style={{
                       borderLeft:'1px solid var(--border)', position:'relative', minHeight:60, padding:2,
@@ -156,8 +225,8 @@ export default function Planner() {
       {/* BOTTOM STATS — grid-cols-3 */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginTop:16 }}>
         {[
-          { icon:Clock,    val:'28 hours', label:'Total Study Time',   bg:'#ede9fe', fg:'#4c1d95' },
-          { icon:BookOpen, val:'6 topics', label:'Topics Covered',     bg:'#d1fae5', fg:'#065f46' },
+          { icon:Clock,    val:`${totalHours} hours`, label:'Total Study Time',   bg:'#ede9fe', fg:'#4c1d95' },
+          { icon:BookOpen, val:`${totalTopics} topics`, label:'Topics Covered',     bg:'#d1fae5', fg:'#065f46' },
           { icon:Calendar, val:'15 days',  label:'Until Estimated Exam', bg:'#ffe4e6', fg:'#881337' },
         ].map(({ icon: Icon, val, label, bg, fg }, i) => (
           <motion.div key={label}

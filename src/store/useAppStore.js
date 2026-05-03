@@ -23,13 +23,23 @@ const useAppStore = create((set, get) => ({
   setSyllabusFile: (f) => set({ syllabusFile: f }),
   clearSyllabusFile: () => set({ syllabusFile: null }),
 
+  // ── Raw extracted texts (persisted for Regenerate) ──
+  extractedTexts: [],
+  syllabusText: '',
+  setExtractedTexts: (texts) => set({ extractedTexts: texts }),
+  setSyllabusText: (text) => set({ syllabusText: text }),
+
   // ── Analysis ───────────────────────────────────
   isAnalyzing: false,
+  analysisComplete: false,
   analysisData: null,
   analysisError: null,
+  analysisProgress: '',
   setAnalyzing: (v) => set({ isAnalyzing: v }),
-  setAnalysisData: (d) => set({ analysisData: d, isAnalyzing: false }),
+  setAnalysisData: (d) => set({ analysisData: d, analysisComplete: true, isAnalyzing: false, analysisError: null }),
   setAnalysisError: (e) => set({ analysisError: e, isAnalyzing: false }),
+  setAnalysisProgress: (msg) => set({ analysisProgress: msg }),
+  clearAnalysis: () => set({ analysisData: null, analysisComplete: false, analysisError: null, analysisProgress: '' }),
 }))
 
 export default useAppStore

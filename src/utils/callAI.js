@@ -4,7 +4,9 @@
  */
 export async function callAI(messages, model = 'anthropic/claude-3.5-sonnet') {
   const apiKey = import.meta.env.VITE_OPENROUTER_KEY
-  if (!apiKey) throw new Error('VITE_OPENROUTER_KEY is not set in .env')
+  if (!apiKey || apiKey === 'your_key_here') {
+    throw new Error('Please set VITE_OPENROUTER_KEY in your .env file with a valid OpenRouter API key')
+  }
 
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -23,5 +25,6 @@ export async function callAI(messages, model = 'anthropic/claude-3.5-sonnet') {
   }
 
   const data = await res.json()
+  if (data.error) throw new Error(data.error.message)
   return data.choices[0].message.content
 }

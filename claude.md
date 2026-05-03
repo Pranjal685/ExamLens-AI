@@ -160,9 +160,10 @@ VITE_OPENROUTER_KEY=your_key_here
 - [x] Landing page built (gen.ai style, Framer Motion, dark+light)
 - [x] App shell + routing (Sidebar, TopBar, PageWrapper, React Router)
 - [x] Upload page (DocuMind drag-drop, file list, syllabus zone, analyze button)
-- [ ] AI pipeline
-- [x] Dashboard (stat cards, Recharts charts, topic cards, heatmap)
-- [x] Study planner (weekly calendar, topic list, priority badges)
+- [x] AI pipeline (callAI, pdfToText with vision fallback, analyzePapers structured JSON)
+- [x] Dashboard wired to real AI data (stat cards, charts, topic grid, summary, syllabus gaps)
+- [x] Study planner wired to AI data (topic allocation, weekly calendar from sessions, regenerate plan)
+- [x] Syllabus page wired (donut coverage chart, gap cards, topic comparison bars)
 - [ ] README + demo video
 - [ ] GitHub pushed + Unstop submitted
 
@@ -171,8 +172,9 @@ VITE_OPENROUTER_KEY=your_key_here
 ## Agent Handoff Notes
 _(Update this section every 30–45 min when switching agents)_
 
-**Last updated:** 2026-05-03T13:19Z  
-**Last completed:** Full UI polish — Step 1-6 complete. Brand switched from purple #6366f1 → Electric Sky #0ea5e9. Tailwind config + index.css rewritten as single source of truth. Landing hero 85vh centered, headline clamp(40px,6vw,72px)/800. Dashboard grid-cols-4 stat cards with tinted icon backgrounds + 36px values. Planner 8-col calendar grid (60px time col, 60px rows), topic list 48px rows. Upload drop zone 280px, analyze button 18px/border-radius 16, disabled state shown not hidden. Sidebar label fade-first collapse animation. No purple anywhere.  
-**Currently working on:** AI pipeline integration (pdfToImages.js + parseAnalysis.js)  
-**Known issues / blockers:** PageWrapper uses fixed marginLeft:260 — if sidebar collapse width changes, update here too.  
-**Files modified last:** tailwind.config.js, src/index.css, Landing.jsx, Dashboard.jsx, Planner.jsx, Upload.jsx, Sidebar.jsx, TopBar.jsx, PageWrapper.jsx
+**Last updated:** 2026-05-03T14:15Z  
+**Last completed:** Full AI pipeline + data wiring complete. Created: `.env`, `src/utils/pdfToText.js` (text+vision dual extraction), `src/utils/analyzePapers.js` (Claude JSON analysis). Updated: `src/store/useAppStore.js` (added extractedTexts, syllabusText, analysisComplete, analysisProgress), `src/utils/callAI.js` (better error handling). Rewired all 4 app pages: Upload.jsx (real PDF extraction + AI analysis flow with progress), Dashboard.jsx (real data from store, skeleton/empty states, summary card, gaps section), Planner.jsx (real studyPlan sessions mapped to calendar, regenerate plan button, computed stats), Syllabus.jsx (donut chart, coverage bars, gap cards). All pages handle loading/error/empty states. No styling was changed.  
+**Currently working on:** Nothing — all AI pipeline steps complete. Next: README + demo video + deploy.  
+**Known issues / blockers:** PageWrapper uses fixed marginLeft:260 — if sidebar collapse width changes, update here too. `.env` key must be set to a real OpenRouter key before AI features work. pdfjs-dist v5 worker URL uses v3.11.174 CDN — may need version alignment if PDF parsing fails.  
+**Files modified last:** .env, .gitignore, src/utils/callAI.js, src/utils/pdfToText.js, src/utils/analyzePapers.js, src/store/useAppStore.js, src/pages/Upload.jsx, src/pages/Dashboard.jsx, src/pages/Planner.jsx, src/pages/Syllabus.jsx
+

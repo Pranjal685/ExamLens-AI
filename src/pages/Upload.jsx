@@ -1,8 +1,11 @@
 import { useState, useRef, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { UploadCloud, FileText, X, Info, ArrowRight, Loader2 } from 'lucide-react'
+import { UploadCloud, FileText, X, Info, ArrowRight, Loader2, AlertCircle } from 'lucide-react'
 import PageWrapper from '../components/layout/PageWrapper'
 import useAppStore from '../store/useAppStore'
+import { extractTextFromPDF } from '../utils/pdfToText'
+import { analyzePapers } from '../utils/analyzePapers'
 
 const BRAND = '#0ea5e9'
 const SUBJECTS = ['Physics', 'Chemistry', 'Mathematics', 'Biology', 'History', 'Economics', 'Computer Science']
@@ -13,11 +16,18 @@ function ShimmerBlock({ h = 14 }) {
 
 export default function Upload() {
   const [dragOver, setDragOver] = useState(false)
-  const [analyzing, setAnalyzing] = useState(false)
+  const [progressMsg, setProgressMsg] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
   const fileInputRef = useRef()
   const syllabusRef = useRef()
+  const navigate = useNavigate()
 
-  const { papersFiles, addPaperFile, removePaperFile, updatePaperFile, syllabusFile, setSyllabusFile, clearSyllabusFile } = useAppStore()
+  const {
+    papersFiles, addPaperFile, removePaperFile, updatePaperFile,
+    syllabusFile, setSyllabusFile, clearSyllabusFile,
+    isAnalyzing, setAnalyzing, setAnalysisData, setAnalysisError,
+    setExtractedTexts, setSyllabusText, setAnalysisProgress,
+  } = useAppStore()
 
   const handleDrop = useCallback((e) => {
     e.preventDefault(); setDragOver(false)
@@ -37,10 +47,61 @@ export default function Upload() {
 
   const fmt = (b) => b > 1e6 ? `${(b/1e6).toFixed(1)} MB` : `${(b/1e3).toFixed(0)} KB`
 
-  const handleAnalyze = () => { setAnalyzing(true); setTimeout(() => setAnalyzing(false), 4000) }
+  const handleAnalyze = async () => {
+    setAnalyzing(true)
+    setErrorMsg('')
+    setProgressMsg('Starting analysis…')
+    setAnalysisProgress('Starting analysis…')
+
+    try {
+      // Step 1: Extract text from each uploaded paper
+      const extractedTexts = []
+      for (let i = 0; i < papersFiles.length; i++) {
+        const f = papersFiles[i]
+        const msg = `Extracting text from Paper ${i + 1} of ${papersFiles.length} — ${f.name}`
+        setProgressMsg(msg)
+        setAnalysisProgress(msg)
+
+        const text = await extractTextFromPDF(f.file, (page, total) => {
+          setProgressMsg(`Extracting text from Paper ${i + 1} of ${papersFiles.length} — Page ${page}/${total}`)
+        })
+
+        extractedTexts.push({ text, name: f.name, year: f.year, subject: f.subject })
+      }
+
+      // Store raw texts in Zustand for Regenerate
+      setExtractedTexts(extractedTexts)
+
+      // Step 2: Extract syllabus text if provided
+      let syllabusTextContent = ''
+      if (syllabusFile) {
+        setProgressMsg('Extracting syllabus text…')
+        setAnalysisProgress('Extracting syllabus text…')
+        syllabusTextContent = await extractTextFromPDF(syllabusFile.file)
+        setSyllabusText(syllabusTextContent)
+      }
+
+      // Step 3: Run AI analysis
+      setProgressMsg('AI is analyzing topic patterns…')
+      setAnalysisProgress('AI is analyzing topic patterns…')
+      const result = await analyzePapers(extractedTexts, syllabusTextContent)
+
+      // Step 4: Store result and navigate
+      setAnalysisData(result)
+      setProgressMsg('')
+      navigate('/app/dashboard')
+
+    } catch (err) {
+      console.error('Analysis error:', err)
+      setAnalyzing(false)
+      setAnalysisError(err.message)
+      setErrorMsg(err.message || 'Something went wrong during analysis. Please try again.')
+      setProgressMsg('')
+    }
+  }
 
   const years = Array.from({ length:10 }, (_, i) => String(new Date().getFullYear() - i))
-  const canAnalyze = papersFiles.length > 0 && !analyzing
+  const canAnalyze = papersFiles.length > 0 && !isAnalyzing
 
   return (
     <PageWrapper title="Upload Papers">
@@ -128,6 +189,23 @@ export default function Upload() {
           )}
         </div>
 
+        {/* ERROR MESSAGE */}
+        <AnimatePresence>
+          {errorMsg && (
+            <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
+              style={{ marginTop:16, background:'#fef2f2', border:'1px solid #fecaca', borderRadius:12, padding:'12px 16px', display:'flex', alignItems:'flex-start', gap:10 }}>
+              <AlertCircle size={18} color="#ef4444" style={{ flexShrink:0, marginTop:2 }} />
+              <div>
+                <p style={{ fontWeight:600, fontSize:'0.85rem', color:'#991b1b' }}>Analysis Failed</p>
+                <p style={{ fontSize:'0.78rem', color:'#b91c1c', marginTop:2 }}>{errorMsg}</p>
+              </div>
+              <button onClick={() => setErrorMsg('')} style={{ marginLeft:'auto', background:'none', border:'none', cursor:'pointer' }}>
+                <X size={14} color="#ef4444" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ANALYZE NOW BUTTON */}
         <div style={{ marginTop:28 }}>
           <motion.button
@@ -144,7 +222,7 @@ export default function Upload() {
               transition:'background .2s, box-shadow .2s',
             }}
           >
-            {analyzing ? <><Loader2 size={20} className="animate-spin" /> Analyzing…</> : <>Analyze Now <ArrowRight size={20} /></>}
+            {isAnalyzing ? <><Loader2 size={20} className="animate-spin" /> Analyzing…</> : <>Analyze Now <ArrowRight size={20} /></>}
           </motion.button>
           <p style={{ textAlign:'center', fontSize:'0.8rem', color:'var(--text-3)', marginTop:10 }}>
             AI will extract topics, frequency patterns, and generate your study plan
@@ -153,12 +231,12 @@ export default function Upload() {
 
         {/* LOADING OVERLAY */}
         <AnimatePresence>
-          {analyzing && (
+          {isAnalyzing && (
             <motion.div initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
               style={{ marginTop:24, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:16, padding:24, display:'flex', flexDirection:'column', gap:12 }}>
               <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                 <Loader2 size={18} color={BRAND} className="animate-spin" />
-                <p style={{ fontWeight:600, color:BRAND, fontSize:'0.9rem' }}>Analyzing your papers…</p>
+                <p style={{ fontWeight:600, color:BRAND, fontSize:'0.9rem' }}>{progressMsg || 'Analyzing your papers…'}</p>
               </div>
               {['Extracting text from PDFs…','Identifying topic clusters…','Calculating frequency scores…','Mapping to syllabus…'].map((step, i) => (
                 <motion.div key={step} initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay: i * 0.8 }}
