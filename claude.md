@@ -159,9 +159,8 @@ VITE_GEMINI_KEY=your_gemini_key_here     ← Google AI Studio (vision + analysis
 ## Agent Handoff Notes
 _(Update this section every 30–45 min when switching agents)_
 
-**Last updated:** 2026-05-03T16:15Z  
-**Last completed:** Data persistence via zustand `persist` middleware. Store renamed: `darkMode→isDark`, `toggleDarkMode→toggleTheme`, `papersFiles→uploadedFilesMetadata`, `syllabusFile→syllabusMetadata`, `setAnalyzing→setIsAnalyzing`. Upload page uses dual state: local `useState` for File objects (session-only) + zustand for serializable metadata. Session notice shown when metadata exists but no local files. Clear All Data button added. Dashboard/Syllabus/TopBar/App.jsx updated to new store API. `extractedTexts` + `analysisData` persist across refresh.  
-**Currently working on:** Nothing — persistence complete. Next: README + demo video + deploy.  
-**Known issues / blockers:** PageWrapper uses fixed marginLeft:260. pdfjs-dist v5 worker may need version alignment if PDF parsing fails.  
-**Files modified last:** src/store/useAppStore.js, src/pages/Upload.jsx, src/pages/Dashboard.jsx, src/pages/Syllabus.jsx, src/components/layout/TopBar.jsx, src/App.jsx, CLAUDE.md
-
+**Last updated:** 2026-05-03T15:30Z  
+**Last completed:** Performance: parallelized PDF extraction pipeline. pdfToText.js now extracts text from all pages via Promise.all, separates text vs image pages, batches vision calls (5 at a time), caps at 15 pages per PDF, truncates output to 8000 chars, uses scale 1.5 + JPEG 0.7 for smaller payloads. Upload.jsx processes all PDFs simultaneously via Promise.all instead of sequential loop. visionAI.js + callAI.js have defensive Gemini response parsing (handles empty candidates, RECITATION finishReason, etc.).  
+**Currently working on:** Nothing — parallelization complete. Next: README + demo video + deploy.  
+**Known issues / blockers:** PageWrapper uses fixed marginLeft:260. pdfjs-dist v5 worker may need version alignment if PDF parsing fails. Gemini may return RECITATION for copyrighted content pages (handled gracefully, returns empty string).  
+**Files modified last:** src/utils/pdfToText.js, src/pages/Upload.jsx, src/utils/visionAI.js, src/utils/callAI.js, claude.md

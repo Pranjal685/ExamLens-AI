@@ -104,20 +104,17 @@ export default function Upload() {
     setAnalysisProgress('Starting analysis…')
 
     try {
-      const extractedTexts = []
-      for (let i = 0; i < localFiles.length; i++) {
-        const f = localFiles[i]
-        const msg = `Extracting text from Paper ${i + 1} of ${localFiles.length} — ${f.name}`
-        setProgressMsg(msg)
-        setAnalysisProgress(msg)
+      // Process ALL PDFs in parallel
+      const msg = `Extracting text from ${localFiles.length} paper${localFiles.length > 1 ? 's' : ''} simultaneously…`
+      setProgressMsg(msg)
+      setAnalysisProgress(msg)
 
-        const text = await extractTextFromPDF(f.file, (page, total) => {
-          setProgressMsg(`Extracting text from Paper ${i + 1} of ${localFiles.length} — Page ${page}/${total}`)
-        })
+      const extractionPromises = localFiles.map(async (f) => {
+        const text = await extractTextFromPDF(f.file)
+        return { text, name: f.name, year: f.year, subject: f.subject }
+      })
 
-        extractedTexts.push({ text, name: f.name, year: f.year, subject: f.subject })
-      }
-
+      const extractedTexts = await Promise.all(extractionPromises)
       setExtractedTexts(extractedTexts)
 
       let syllabusTextContent = ''
@@ -128,9 +125,12 @@ export default function Upload() {
         setSyllabusText(syllabusTextContent)
       }
 
-      setProgressMsg('AI is analyzing topic patterns…')
-      setAnalysisProgress('AI is analyzing topic patterns…')
+      setProgressMsg('Running AI analysis on extracted content…')
+      setAnalysisProgress('Running AI analysis on extracted content…')
       const result = await analyzePapers(extractedTexts, syllabusTextContent)
+
+      setProgressMsg('Building your study plan…')
+      setAnalysisProgress('Building your study plan…')
 
       setAnalysisData(result)
       setProgressMsg('')
