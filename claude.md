@@ -167,9 +167,9 @@ _(Update this section every 30–45 min when switching agents)_
 - **Animations chosen**: Fast, easing-driven fades and snappy micro-interactions. The focus is on making it feel like a high-performance tool, not a toy.
 - **Changes**: Updated `index.css` with the design brief and new variables. Removed pastel colors, large shadows, and float animations across `Landing.jsx`, `Dashboard.jsx`, `Upload.jsx`, `Planner.jsx`, `Syllabus.jsx`, and `Sidebar.jsx`. Dark mode remains the default, but light mode CSS variables were also updated to maintain a crisp "Vercel" style aesthetic.
 
-**Last updated:** 2026-05-03T16:15Z
+**Last updated:** 2026-05-03T16:25Z
 **Last completed:**
-1. **Study Planner Restructure**: Overhauled `Planner.jsx` to match Metric Flow design, using dot colors for priority allocation, tinted backgrounds with left borders for events, clean calendar grid without borders for empty cells, and warm stat cards at the bottom.
+1. **Study Planner Kanban Redesign**: Overhauled `Planner.jsx` to completely replace the calendar grid. It now features a 2-section layout matching Linear's issue list feel: a 3-column "Study Priority Board" for topics (kanban style) and a horizontal chip-based "Daily Study Schedule" below it. This is much cleaner, scales infinitely, and feels highly premium.
 2. **Syllabus Donut Chart Fix**: Updated donut chart in `Syllabus.jsx` to use accent color for coverage and muted color for gaps. Added a legend, adjusted progress bars, and styled gap topics with warning colors.
 3. **Sidebar Actions**: Built custom Framer Motion modals in `Sidebar.jsx` for Preferences, Help (expandable FAQ), and Logout (confirmation dialog).
 

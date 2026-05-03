@@ -226,3 +226,23 @@ html:not(.dark) .heat-4 { background: rgba(0,0,0,0.8); }
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── HOVER HELPER CLASSES (Fixes framer-motion var caching) ── */
+.hover-feature-card {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease !important;
+}
+.hover-feature-card:hover {
+  border-color: var(--border-2) !important;
+  background: var(--bg-hover) !important;
+  box-shadow: var(--glow-hover) !important;
+}
+
+.hover-topic-card {
+  transition: background 0.2s ease, border-color 0.2s ease !important;
+}
+.hover-topic-card:hover {
+  border-top-color: var(--border-2) !important;
+  border-right-color: var(--border-2) !important;
+  border-bottom-color: var(--border-2) !important;
+  background: var(--bg-hover) !important;
+}

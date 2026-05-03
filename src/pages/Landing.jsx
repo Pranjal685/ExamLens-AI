@@ -160,8 +160,9 @@ export default function Landing() {
         </Reveal>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:24 }}>
           {FEATURES.map(({ icon: Icon, label, desc }) => (
-            <motion.div key={label} whileHover={{ y:-2, borderColor:'var(--border-2)', background:'var(--bg-hover)', boxShadow:'var(--glow-hover)' }} transition={{ duration:0.2 }}
-              style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:12, padding:28, display:'flex', flexDirection:'column', height:'100%', transition:'box-shadow 0.2s ease' }}>
+            <motion.div key={label} whileHover={{ y:-2 }} transition={{ duration:0.2 }}
+              className="hover-feature-card"
+              style={{ background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:12, padding:28, display:'flex', flexDirection:'column', height:'100%' }}>
               <div style={{ width:44, height:44, borderRadius:10, background:'var(--bg-card-2)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16 }}>
                 <Icon size={20} color="var(--text-1)" />
               </div>

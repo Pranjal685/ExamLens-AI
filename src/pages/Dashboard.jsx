@@ -181,7 +181,8 @@ export default function Dashboard() {
               return (
                 <motion.div key={name}
                   initial={{ opacity:0, y:12 }} animate={{ opacity:1, y:0 }} transition={{ delay: i * 0.06 + 0.2 }}
-                  whileHover={{ y:-2, borderColor:'var(--border-2)', background:'var(--bg-hover)', transition:{ duration:0.2 } }}
+                  whileHover={{ y:-2 }}
+                  className="hover-topic-card"
                   style={{
                     background:'var(--bg-card)', borderRadius:12, padding:20,
                     border:`1px solid var(--border)`,
