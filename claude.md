@@ -176,3 +176,15 @@ _(Update this section every 30–45 min when switching agents)_
 **Currently working on:** Next steps: README + demo video + deploy.  
 **Known issues / blockers:** None currently.
 **Files modified last:** src/pages/Planner.jsx, src/pages/Syllabus.jsx, src/components/layout/Sidebar.jsx, claude.md
+
+**Last updated:** 2026-05-03T17:10Z
+**Last completed:** Full security audit + stress test pass.
+- API key protection: removed partial-key console log from visionAI.js. Removed verbose response dumps in visionAI + callAI (sensitive exam content). Remaining console calls are minimal error-only (no response bodies, no env vars).
+- Gitignore + env.example: added .env.local and .env.*.local to .gitignore. Created .env.example with placeholder.
+- Injection audit: confirmed zero unsafe HTML injection sinks, no dynamic code evaluation, no raw innerHTML assignments in src/. AI content rendered as text-only via React.
+- AI response sanitization: added recursive sanitizer in analyzePapers.js that escapes angle brackets and strips js-protocol + on* handler patterns from every string field before storing. Friendlier JSON parse fallback error.
+- Zustand persist hardening: extractedTexts + syllabusText removed from partialize (kept in-memory only). analysisData still persists. Upload.jsx hasPreviousAnalysis switched to analysisComplete so the CTA still works post-refresh.
+- Stress fixes: pdfToText wraps PDF open in try/catch (corrupted -> friendly error), throws if extracted text empty. Upload enforces 50MB per-file limit on papers + syllabus, soft-warns at >10 files, guards handleAnalyze against re-entry (early return + button disabled), maps fetch/network errors to friendly message.
+- Env validation: main.jsx warns at startup if VITE_GEMINI_KEY missing (no key value exposed).
+- npm audit: 0 vulnerabilities.
+**Files modified last:** src/utils/visionAI.js, src/utils/callAI.js, src/utils/analyzePapers.js, src/utils/pdfToText.js, src/store/useAppStore.js, src/pages/Upload.jsx, src/pages/Planner.jsx, src/main.jsx, .gitignore, .env.example, CLAUDE.md
