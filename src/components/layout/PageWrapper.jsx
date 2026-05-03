@@ -10,12 +10,13 @@ const pageVariants = {
 
 export default function PageWrapper({ title, children }) {
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--bg)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
       <Sidebar />
-      <div className="main-wrap flex-1">
+      {/* main area shifts right to clear fixed sidebar (260px expanded default) */}
+      <div className="main-wrap flex-1" style={{ marginLeft: 260, minWidth: 0 }}>
         <TopBar title={title} />
         <motion.main
-          className="flex-1 p-6"
+          style={{ padding: '1.5rem', flex: 1 }}
           variants={pageVariants}
           initial="initial"
           animate="animate"

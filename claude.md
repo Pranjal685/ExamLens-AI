@@ -171,8 +171,8 @@ VITE_OPENROUTER_KEY=your_key_here
 ## Agent Handoff Notes
 _(Update this section every 30–45 min when switching agents)_
 
-**Last updated:** 2026-05-03T07:35Z  
-**Last completed:** Frontend shell complete — Landing, Upload, Dashboard, Planner, Syllabus pages all built and verified running at localhost:5173  
-**Currently working on:** AI pipeline (callAI.js is stubbed, pdfToImages.js + parseAnalysis.js need implementation)  
-**Known issues / blockers:** Stitch MCP design system tool had invalid argument errors — used Stitch screen generation directly with inline prompts. Colors match reference screenshots (indigo #6366f1 accent, #010816 dark primary, pastel stat cards).  
-**Files modified last:** src/pages/Landing.jsx, Upload.jsx, Dashboard.jsx, Planner.jsx, Syllabus.jsx, src/components/layout/Sidebar.jsx, TopBar.jsx, PageWrapper.jsx, src/store/useAppStore.js, src/index.css, vite.config.js, main.jsx, App.jsx
+**Last updated:** 2026-05-03T13:19Z  
+**Last completed:** Full UI polish — Step 1-6 complete. Brand switched from purple #6366f1 → Electric Sky #0ea5e9. Tailwind config + index.css rewritten as single source of truth. Landing hero 85vh centered, headline clamp(40px,6vw,72px)/800. Dashboard grid-cols-4 stat cards with tinted icon backgrounds + 36px values. Planner 8-col calendar grid (60px time col, 60px rows), topic list 48px rows. Upload drop zone 280px, analyze button 18px/border-radius 16, disabled state shown not hidden. Sidebar label fade-first collapse animation. No purple anywhere.  
+**Currently working on:** AI pipeline integration (pdfToImages.js + parseAnalysis.js)  
+**Known issues / blockers:** PageWrapper uses fixed marginLeft:260 — if sidebar collapse width changes, update here too.  
+**Files modified last:** tailwind.config.js, src/index.css, Landing.jsx, Dashboard.jsx, Planner.jsx, Upload.jsx, Sidebar.jsx, TopBar.jsx, PageWrapper.jsx

@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Upload, LayoutDashboard, CalendarDays, BookOpen,
   Settings, HelpCircle, LogOut, ChevronLeft, ChevronRight,
-  ScanSearch, User
+  ScanSearch, User,
 } from 'lucide-react'
-import useAppStore from '../../store/useAppStore'
 
 const NAV_MAIN = [
   { to: '/app/upload',    icon: Upload,          label: 'Upload Papers' },
@@ -19,126 +18,94 @@ const NAV_SETTINGS = [
   { icon: HelpCircle, label: 'Help' },
 ]
 
+const lbl = {
+  show: { opacity: 1, transition: { duration: 0.15, delay: 0.12 } },
+  hide: { opacity: 0, transition: { duration: 0.12 } },
+}
+
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
-  const navigate = useNavigate()
-  const toggleDark = useAppStore(s => s.toggleDarkMode)
-  const dark = useAppStore(s => s.darkMode)
 
   return (
     <motion.aside
-      className="sidebar"
       animate={{ width: collapsed ? 72 : 260 }}
-      transition={{ duration: 0.25, ease: 'easeInOut' }}
-      style={{ overflow: 'hidden' }}
+      transition={{ duration: 0.22, ease: 'easeInOut', delay: collapsed ? 0.14 : 0 }}
+      className="sidebar"
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b"
-           style={{ borderColor: 'var(--border)', minHeight: 64 }}>
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
-             style={{ background: '#6366f1' }}>
-          <ScanSearch size={18} color="#fff" />
+      {/* LOGO */}
+      <div style={{ display:'flex', alignItems:'center', gap:12, padding: collapsed ? '0 20px' : '0 16px', height:64, borderBottom:'1px solid var(--border)', flexShrink:0 }}>
+        <div style={{ width:32, height:32, borderRadius:8, flexShrink:0, background:'var(--brand)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <ScanSearch size={17} color="#fff" />
         </div>
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {!collapsed && (
-            <motion.span
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 'auto' }}
-              exit={{ opacity: 0, width: 0 }}
-              className="font-bold text-sm whitespace-nowrap"
-              style={{ color: 'var(--text-1)' }}
-            >
+            <motion.span key="bn" variants={lbl} initial="hide" animate="show" exit="hide"
+              style={{ fontWeight:700, fontSize:'0.875rem', color:'var(--text-1)', whiteSpace:'nowrap' }}>
               ExamLens AI
             </motion.span>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Main Nav */}
-      <div className="flex-1 px-3 py-4 flex flex-col gap-1">
-        {!collapsed && (
-          <p className="label-caps px-2 mb-2" style={{ color: 'var(--text-3)' }}>MAIN</p>
-        )}
+      {/* MAIN NAV */}
+      <div style={{ flex:1, padding:'12px 10px', display:'flex', flexDirection:'column', gap:2, overflowY:'auto' }}>
+        {!collapsed && <p style={{ fontSize:'0.68rem', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--text-3)', padding:'0 8px', margin:'4px 0' }}>MAIN</p>}
+
         {NAV_MAIN.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              `nav-item ${isActive ? 'active' : ''}`
-            }
-            title={collapsed ? label : ''}
-          >
-            <Icon size={18} className="flex-shrink-0" />
-            <AnimatePresence>
+          <NavLink key={to} to={to} title={collapsed ? label : ''} style={{ textDecoration:'none' }}
+            className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+            <Icon size={18} style={{ flexShrink:0 }} />
+            <AnimatePresence initial={false}>
               {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {label}
-                </motion.span>
+                <motion.span key={`n${label}`} variants={lbl} initial="hide" animate="show" exit="hide"
+                  style={{ whiteSpace:'nowrap' }}>{label}</motion.span>
               )}
             </AnimatePresence>
           </NavLink>
         ))}
 
-        <div className="my-3 border-t" style={{ borderColor: 'var(--border)' }} />
+        <div style={{ height:1, background:'var(--border)', margin:'10px 0' }} />
 
-        {!collapsed && (
-          <p className="label-caps px-2 mb-2" style={{ color: 'var(--text-3)' }}>SETTINGS</p>
-        )}
+        {!collapsed && <p style={{ fontSize:'0.68rem', fontWeight:700, letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--text-3)', padding:'0 8px', marginBottom:4 }}>SETTINGS</p>}
+
         {NAV_SETTINGS.map(({ icon: Icon, label }) => (
-          <button key={label} className="nav-item w-full text-left" title={collapsed ? label : ''}>
-            <Icon size={18} className="flex-shrink-0" />
-            <AnimatePresence>
+          <button key={label} title={collapsed ? label : ''} className="nav-item">
+            <Icon size={18} style={{ flexShrink:0 }} />
+            <AnimatePresence initial={false}>
               {!collapsed && (
-                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  {label}
-                </motion.span>
+                <motion.span key={`s${label}`} variants={lbl} initial="hide" animate="show" exit="hide"
+                  style={{ whiteSpace:'nowrap' }}>{label}</motion.span>
               )}
             </AnimatePresence>
           </button>
         ))}
       </div>
 
-      {/* User Profile */}
-      <div className="border-t px-3 py-4" style={{ borderColor: 'var(--border)' }}>
-        <div className="nav-item w-full" title={collapsed ? 'Student Account' : ''}>
-          <div className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
-               style={{ background: '#6366f1' }}>
-            <User size={14} color="#fff" />
+      {/* USER PROFILE — pinned bottom */}
+      <div style={{ borderTop:'1px solid var(--border)', padding:'12px 10px', flexShrink:0 }}>
+        <div className="nav-item" style={{ cursor:'default' }} title={collapsed ? 'Student' : ''}>
+          <div style={{ width:28, height:28, borderRadius:'50%', flexShrink:0, background:'var(--brand)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <User size={13} color="#fff" />
           </div>
-          <AnimatePresence>
+          <AnimatePresence initial={false}>
             {!collapsed && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="flex-1 min-w-0">
-                <p className="text-xs font-600 truncate" style={{ color: 'var(--text-1)' }}>Student</p>
-                <p className="text-xs" style={{ color: 'var(--text-3)' }}>Grade 12</p>
+              <motion.div key="ui" variants={lbl} initial="hide" animate="show" exit="hide" style={{ flex:1, minWidth:0 }}>
+                <p style={{ fontSize:'0.8rem', fontWeight:600, color:'var(--text-1)', lineHeight:1.2 }}>Student</p>
+                <p style={{ fontSize:'0.72rem', color:'var(--text-3)' }}>Grade 12</p>
               </motion.div>
             )}
           </AnimatePresence>
-          {!collapsed && (
-            <LogOut size={15} style={{ color: 'var(--text-3)' }} className="flex-shrink-0" />
-          )}
+          {!collapsed && <LogOut size={14} style={{ color:'var(--text-3)', flexShrink:0 }} />}
         </div>
       </div>
 
-      {/* Collapse Toggle */}
+      {/* COLLAPSE TOGGLE */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 rounded-full flex items-center justify-center border"
-        style={{
-          background: 'var(--bg-card)',
-          borderColor: 'var(--border)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        }}
+        style={{ position:'absolute', right:-12, top:80, width:24, height:24, borderRadius:'50%', background:'var(--bg-card)', border:'1px solid var(--border)', boxShadow:'0 2px 8px rgba(0,0,0,.2)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}
+        aria-label="Toggle sidebar"
       >
-        {collapsed
-          ? <ChevronRight size={12} style={{ color: 'var(--text-2)' }} />
-          : <ChevronLeft size={12} style={{ color: 'var(--text-2)' }} />
-        }
+        {collapsed ? <ChevronRight size={12} style={{ color:'var(--text-2)' }} /> : <ChevronLeft size={12} style={{ color:'var(--text-2)' }} />}
       </button>
     </motion.aside>
   )
