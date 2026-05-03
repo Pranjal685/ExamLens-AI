@@ -7,11 +7,17 @@ export async function callAI(prompt, systemPrompt = '') {
       body: JSON.stringify({
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 4000, temperature: 0.3 },
+        generationConfig: {
+          maxOutputTokens: 4000,
+          temperature: 0.3,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
     }
   )
   const data = await res.json()
   if (data.error) throw new Error(data.error.message)
-  return data.candidates[0].content.parts[0].text
+  const parts = data.candidates[0].content.parts
+  const text = parts.find((p) => !p.thought)?.text ?? parts[parts.length - 1].text
+  return text
 }

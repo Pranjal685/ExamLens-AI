@@ -21,11 +21,15 @@ export async function extractTextFromImage(base64Image) {
             ],
           },
         ],
-        generationConfig: { maxOutputTokens: 2000 },
+        generationConfig: {
+          maxOutputTokens: 2000,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
     }
   )
   const data = await res.json()
   if (data.error) throw new Error(data.error.message)
-  return data.candidates[0].content.parts[0].text
+  const parts = data.candidates[0].content.parts
+  return parts.find((p) => !p.thought)?.text ?? parts[parts.length - 1].text
 }
