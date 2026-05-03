@@ -16,7 +16,16 @@ export async function callAI(prompt, systemPrompt = '') {
     }
   )
   const data = await res.json()
+  console.log('Gemini analysis response:', JSON.stringify(data).slice(0, 500))
+
   if (data.error) throw new Error(data.error.message)
+  if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+    throw new Error(
+      'Invalid Gemini response structure: ' +
+        JSON.stringify(data).slice(0, 200)
+    )
+  }
+
   const parts = data.candidates[0].content.parts
   const text = parts.find((p) => !p.thought)?.text ?? parts[parts.length - 1].text
   return text
