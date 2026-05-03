@@ -9,13 +9,13 @@ import { analyzePapers } from '../utils/analyzePapers'
 const BRAND = 'var(--brand)'
 const DAYS_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-const HOURS = ['9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM']
-const HOUR_MAP = { '09:00':0, '10:00':1, '11:00':2, '12:00':3, '13:00':4, '14:00':5, '15:00':6, '16:00':7, '17:00':8, '18:00':9, '19:00':10, '20:00':11 }
+const HOURS = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM']
+const HOUR_MAP = { '08:00':0, '09:00':1, '10:00':2, '11:00':3, '12:00':4, '13:00':5, '14:00':6, '15:00':7, '16:00':8, '17:00':9, '18:00':10, '19:00':11, '20:00':12 }
 const DOT_COLOR = { HIGH:'#ef4444', MEDIUM:'#f59e0b', LOW:'#10b981', high:'#ef4444', medium:'#f59e0b', low:'#10b981' }
 const EVENT_STYLE = {
-  HIGH: { bg: 'rgba(239,68,68,0.15)', border: '#ef4444' },
-  MEDIUM: { bg: 'rgba(245,158,11,0.15)', border: '#f59e0b' },
-  LOW: { bg: 'rgba(16,185,129,0.15)', border: '#10b981' },
+  HIGH: { bg: 'rgba(239,68,68,0.08)', bgHover: 'rgba(239,68,68,0.12)', border: '#ef4444' },
+  MEDIUM: { bg: 'rgba(245,158,11,0.08)', bgHover: 'rgba(245,158,11,0.12)', border: '#f59e0b' },
+  LOW: { bg: 'rgba(16,185,129,0.08)', bgHover: 'rgba(16,185,129,0.12)', border: '#10b981' },
 }
 const TODAY = 0
 
@@ -94,14 +94,16 @@ export default function Planner() {
 
       {/* TOP BAR */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          <button style={{ width:32, height:32, borderRadius:'50%', background:'var(--bg-card)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
-            <ChevronLeft size={14} style={{ color:'var(--text-2)' }} />
-          </button>
-          <p style={{ fontWeight:600, fontSize:'0.9rem', color:'var(--text-1)' }}>Week of May 5–11, 2026</p>
-          <button style={{ width:32, height:32, borderRadius:'50%', background:'var(--bg-card)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
-            <ChevronRight size={14} style={{ color:'var(--text-2)' }} />
-          </button>
+        <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+          <div style={{ display:'flex', gap:4 }}>
+            <button style={{ width:32, height:32, borderRadius:6, background:'var(--bg-card)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+              <ChevronLeft size={16} style={{ color:'var(--text-2)' }} />
+            </button>
+            <button style={{ width:32, height:32, borderRadius:6, background:'var(--bg-card)', border:'1px solid var(--border)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' }}>
+              <ChevronRight size={16} style={{ color:'var(--text-2)' }} />
+            </button>
+          </div>
+          <p style={{ fontWeight:600, fontSize:16, color:'var(--text-1)' }}>Week of May 5–11, 2026</p>
         </div>
         <div style={{ display:'flex', gap:8 }}>
           <button style={{ display:'flex', alignItems:'center', gap:6, padding:'0.45rem 1rem', borderRadius:9999, border:'1.5px solid var(--border)', background:'transparent', color:'var(--text-2)', fontWeight:600, fontSize:'0.82rem', cursor:'pointer' }}>
@@ -123,7 +125,7 @@ export default function Planner() {
 
         {/* LEFT: TOPIC ALLOCATION — w-72 */}
         <motion.div initial={{ opacity:0, x:-20 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.4 }}
-          style={{ width:288, flexShrink:0, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:16, padding:20, display:'flex', flexDirection:'column', gap:0 }}>
+          style={{ width:280, flexShrink:0, background:'var(--bg-card)', border:'1px solid var(--border)', borderRadius:16, padding:20, display:'flex', flexDirection:'column', overflowY:'auto' }}>
 
           {/* Header row */}
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16 }}>
@@ -140,31 +142,25 @@ export default function Planner() {
             </div>
           </div>
 
-          {/* Topic rows — consistent 52px height */}
-          {studyPlan.map(({ topic, priority, hoursPerWeek }, i) => {
-            const level = priority?.toLowerCase() || 'medium'
-            const pct = Math.min(100, ((hoursPerWeek || 0) / 10) * 100)
-            return (
-              <motion.div key={topic}
-                initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.06 + 0.1 }}
-                style={{ height:52, display:'flex', flexDirection:'column', justifyContent:'center', borderBottom: '1px solid var(--border)' }}
-              >
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                    <div style={{ width:7, height:7, borderRadius:'50%', background:DOT_COLOR[level] || '#f59e0b', flexShrink:0 }} />
-                    <span style={{ fontSize:'0.82rem', fontWeight:600, color:'var(--text-1)' }}>{topic}</span>
+          {/* Topic rows — auto height */}
+          <div style={{ display:'flex', flexDirection:'column' }}>
+            {studyPlan.map(({ topic, priority, hoursPerWeek }, i) => {
+              const level = priority?.toLowerCase() || 'medium'
+              return (
+                <motion.div key={topic}
+                  initial={{ opacity:0, x:-10 }} animate={{ opacity:1, x:0 }} transition={{ delay: i * 0.06 + 0.1 }}
+                  whileHover={{ background: 'var(--bg-card-2)' }}
+                  style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 8px', borderBottom: '1px solid var(--border)', borderRadius:6, transition: 'background 0.15s ease', cursor:'default' }}
+                >
+                  <div style={{ display:'flex', alignItems:'flex-start', gap:10, flex:1, paddingRight:12 }}>
+                    <div style={{ width:8, height:8, borderRadius:'50%', background:DOT_COLOR[level] || '#f59e0b', flexShrink:0, marginTop:5 }} />
+                    <span style={{ fontSize:14, fontWeight:500, color:'var(--text-1)', lineHeight:1.4 }}>{topic}</span>
                   </div>
-                  <span style={{ fontSize:'0.75rem', color:'var(--text-3)', fontWeight:500 }}>{hoursPerWeek}h</span>
-                </div>
-                <div style={{ height:4, borderRadius:2, background:'var(--bg-card-2)', overflow:'hidden' }}>
-                  <motion.div
-                    initial={{ width:0 }} animate={{ width:`${pct}%` }} transition={{ duration:0.7, delay: i * 0.06 + 0.2 }}
-                    style={{ height:'100%', borderRadius:2, background:DOT_COLOR[level] || '#f59e0b' }}
-                  />
-                </div>
-              </motion.div>
-            )
-          })}
+                  <span style={{ fontSize:12, color:'var(--text-2)', background:'var(--bg-card-2)', padding:'2px 8px', borderRadius:12, fontWeight:500, flexShrink:0 }}>{hoursPerWeek}h</span>
+                </motion.div>
+              )
+            })}
+          </div>
         </motion.div>
 
         {/* RIGHT: WEEKLY SCHEDULE — flex-1 */}
@@ -183,44 +179,56 @@ export default function Planner() {
               <div key={d} style={{
                 textAlign:'center', padding:'12px 4px',
                 background: i === TODAY ? `rgba(245,158,11,0.06)` : 'transparent',
+                borderLeft: '1px solid var(--border)'
               }}>
-                <p style={{ fontSize:'0.7rem', fontWeight:600, textTransform:'uppercase', color: 'var(--text-3)', letterSpacing:'0.06em' }}>{d}</p>
-                <p style={{ fontSize:'1.1rem', fontWeight:700, color: i === TODAY ? '#f59e0b' : 'var(--text-1)', marginTop:2 }}>{5 + i}</p>
+                <p style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', color: 'var(--text-3)', letterSpacing:'0.06em' }}>{d}</p>
+                <p style={{ fontSize:20, fontWeight:600, color: i === TODAY ? '#f59e0b' : 'var(--text-1)', marginTop:2 }}>{5 + i}</p>
               </div>
             ))}
           </div>
 
-          {/* Time rows — 60px height */}
+          {/* Time rows — 56px height */}
           <div style={{ overflowY:'auto', maxHeight:500 }}>
             {HOURS.map((hr, hi) => (
-              <div key={hr} style={{ display:'grid', gridTemplateColumns:'60px repeat(7,1fr)', borderBottom:'1px solid var(--border)', minHeight:60 }}>
-                <div style={{ padding:'0 8px', display:'flex', alignItems:'center' }}>
-                  <span style={{ fontSize:'0.66rem', color:'var(--text-3)', whiteSpace:'nowrap', fontWeight:500 }}>{hr}</span>
+              <div key={hr} style={{ display:'grid', gridTemplateColumns:'60px repeat(7,1fr)', borderBottom:'1px solid var(--border)', minHeight:56 }}>
+                <div style={{ padding:'0 12px 0 0', display:'flex', alignItems:'center', justifyContent:'flex-end' }}>
+                  <span style={{ fontSize:12, color:'var(--text-3)', whiteSpace:'nowrap', fontWeight:500 }}>{hr}</span>
                 </div>
                 {DAYS.map((_, di) => {
                   const evt = events.find(e => e.day === di && e.start === hi)
                   return (
-                    <div key={di} style={{
-                      position:'relative', minHeight:60, padding:2,
-                      background: di === TODAY ? 'rgba(245,158,11,0.03)' : 'transparent',
-                    }}>
+                    <motion.div key={di} 
+                      whileHover={{ background: 'rgba(255,255,255,0.02)' }}
+                      style={{
+                        position:'relative', minHeight:56, padding:2,
+                        borderLeft: '1px solid var(--border)',
+                        background: 'transparent',
+                        transition: 'background 0.15s ease'
+                      }}>
                       {evt && (
                         <motion.div
                           initial={{ opacity:0, scale:0.95 }}
                           animate={{ opacity:1, scale:1 }}
                           transition={{ delay:0.3 + di * 0.05 }}
+                          whileHover={{ borderLeftWidth:4, backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
                           style={{
-                            position:'absolute', left:3, right:3, top:3, height: evt.span * 60 - 6,
-                            borderRadius:6, padding:'6px 8px', zIndex:1, overflow:'hidden',
-                            background: evt.style.bg,
+                            position:'absolute', left:3, right:3, top:3, height: evt.span * 56 - 6,
+                            padding:'6px 8px', zIndex:1, overflow:'hidden',
+                            backgroundColor: 'rgba(255, 255, 255, 0.04)',
                             borderLeft: `3px solid ${evt.style.border}`,
+                            borderTop: 'none',
+                            borderRight: 'none',
+                            borderBottom: 'none',
+                            borderRadius: '4px',
+                            transition: 'all 0.15s ease',
+                            cursor: 'pointer'
                           }}
                         >
-                          <div style={{ fontSize:13, fontWeight:700, color:'var(--text-1)', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{evt.topic}</div>
-                          <div style={{ fontSize:12, fontWeight:500, color:'var(--text-3)', marginTop:2 }}>{evt.span}h</div>
+                          <div style={{ fontSize:13, fontWeight:600, color:'var(--text-1)', lineHeight:1.3 }}>{evt.topic}</div>
+                          <div style={{ fontSize:11, fontWeight:500, color:'rgba(255,255,255,0.5)', marginTop:2 }}>{evt.span}h</div>
                         </motion.div>
                       )}
-                    </div>
+                    </motion.div>
                   )
                 })}
               </div>
@@ -232,22 +240,16 @@ export default function Planner() {
       {/* BOTTOM STATS — grid-cols-3 */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginTop:16, paddingBottom: 20 }}>
         {[
-          { icon:Clock,    val:`${totalHours} hours`, label:'Total Study Time' },
-          { icon:BookOpen, val:`${totalTopics} topics`, label:'Topics Covered' },
-          { icon:Calendar, val:'15 days',  label:'Until Estimated Exam' },
-        ].map(({ icon: Icon, val, label }, i) => (
+          { val:totalHours, label:'hours this week' },
+          { val:totalTopics, label:'topics scheduled' },
+          { val:'7',        label:'days planned' },
+        ].map(({ val, label }, i) => (
           <motion.div key={label}
             initial={{ opacity:0, y:16 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.5 + i * 0.08 }}
-            whileHover={{ y:-2, transition:{ duration:0.15 } }}
-            style={{ background:'rgba(245,158,11,0.02)', border:'1px solid var(--border)', borderRadius:12, padding:'24px 24px', display:'flex', alignItems:'center', gap:16 }}
+            style={{ background:'var(--bg-card-2)', borderRadius:12, padding:'20px 24px', display:'flex', alignItems:'baseline', gap:10 }}
           >
-            <div style={{ width:40, height:40, borderRadius:8, background:'rgba(245,158,11,0.1)', border:'1px solid rgba(245,158,11,0.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-              <Icon size={20} color="#f59e0b" />
-            </div>
-            <div>
-              <p style={{ fontSize:'1.6rem', fontWeight:800, lineHeight:1, color:'var(--text-1)' }}>{val}</p>
-              <p style={{ fontSize:'0.82rem', fontWeight:600, marginTop:4, color:'var(--text-3)' }}>{label}</p>
-            </div>
+            <p style={{ fontSize:'2.25rem', fontWeight:600, lineHeight:1, color:'var(--text-1)', letterSpacing:'-0.02em' }}>{val}</p>
+            <p style={{ fontSize:14, fontWeight:500, color:'var(--text-3)' }}>{label}</p>
           </motion.div>
         ))}
       </div>
