@@ -6,8 +6,8 @@
 
 **AI-powered past paper analyzer that identifies high-yield topics, predicts exam patterns, and generates personalized study plans.**
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](YOUR_VERCEL_URL)
-[![GitHub](https://img.shields.io/badge/GitHub-Repo-blue)](YOUR_GITHUB_URL)
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://exam-lens-ai.vercel.app/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repo-blue)](https://github.com/Pranjal685/ExamLens-AI)
 
 </div>
 
@@ -15,13 +15,13 @@
 
 ## 📹 Demo Video
 
-> 🎬 [Watch Full Demo on Google Drive](YOUR_DRIVE_LINK)
+> 🎬 [Watch Full Demo on Google Drive](https://drive.google.com/file/d/1uPADQhi866KsBL8TYzYgnpjgSAFUhYqh/view?usp=sharing)
 
 ---
 
 ## 🚀 Live Demo
 
-👉 **[examlens-ai.vercel.app](YOUR_VERCEL_URL)**
+👉 **[examlens-ai.vercel.app](https://exam-lens-ai.vercel.app/)**
 
 Click "Try Live Demo" on the landing page for instant access without uploading files.
 
