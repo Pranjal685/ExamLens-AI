@@ -11,7 +11,7 @@ export async function callAI(prompt, systemPrompt = '') {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-70b-versatile',
+      model: 'llama3-70b-8192',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt },
