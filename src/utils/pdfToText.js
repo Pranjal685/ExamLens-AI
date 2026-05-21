@@ -48,7 +48,7 @@ export async function extractTextFromPDF(file, onPageProgress) {
   // If ≥50% of pages have text — treat as a text PDF
   const textRatio = textPages.length / numPages
 
-  let fullText = ''
+  let fullText
 
   if (textRatio >= 0.5) {
     // Mostly text-based — skip vision entirely, use extracted text

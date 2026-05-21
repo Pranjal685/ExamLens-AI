@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, Download, RefreshCw, Clock, BookOpen, Calendar, Loader2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, RefreshCw, BookOpen, Calendar, Loader2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import PageWrapper from '../components/layout/PageWrapper'
 import useAppStore from '../store/useAppStore'
@@ -9,8 +9,6 @@ import { analyzePapers } from '../utils/analyzePapers'
 const BRAND = 'var(--brand)'
 const DAYS_FULL = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
-const HOURS = ['8 AM','9 AM','10 AM','11 AM','12 PM','1 PM','2 PM','3 PM','4 PM','5 PM','6 PM','7 PM','8 PM']
-const HOUR_MAP = { '08:00':0, '09:00':1, '10:00':2, '11:00':3, '12:00':4, '13:00':5, '14:00':6, '15:00':7, '16:00':8, '17:00':9, '18:00':10, '19:00':11, '20:00':12 }
 const DOT_COLOR = { HIGH:'#ef4444', MEDIUM:'#f59e0b', LOW:'#10b981', high:'#ef4444', medium:'#f59e0b', low:'#10b981' }
 const EVENT_STYLE = {
   HIGH: { bg: 'rgba(239,68,68,0.08)', bgHover: 'rgba(239,68,68,0.12)', border: '#ef4444' },

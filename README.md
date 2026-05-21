@@ -67,10 +67,10 @@ User uploads PDFs
        ↓
 pdf.js extracts text (page by page)
        ↓
-Image-based pages → Gemini Vision API → text
+Image-based pages → POST /api/vision → Gemini Vision → text
 Text-based pages → direct extraction
        ↓
-Combined text sent to Gemini 1.5 Flash
+Combined text → POST /api/gemini → Gemini 2.5 Flash
        ↓
 Structured JSON: topics, frequency, difficulty,
 year distribution, study plan, syllabus gaps
@@ -78,6 +78,8 @@ year distribution, study plan, syllabus gaps
 React UI renders analytics + study planner
 Zustand persists results to localStorage
 ```
+
+> **Security**: All Gemini API calls are routed through Vercel Serverless Functions (`/api/gemini`, `/api/vision`). The API key is injected server-side and never reaches the browser.
 
 ---
 
@@ -95,8 +97,11 @@ Zustand persists results to localStorage
 - pdf.js (PDF text extraction)
 - Parallel processing for multi-file uploads
 
+**Backend**
+- Vercel Serverless Functions (API key proxy)
+
 **Deployment**
-- Vercel (frontend hosting)
+- Vercel (frontend + serverless functions)
 
 ---
 
@@ -127,10 +132,14 @@ npm run dev
 ### Environment Variables
 
 ```env
-VITE_GEMINI_KEY=your_gemini_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
+> ⚠️ **Do NOT** prefix with `VITE_` — that would expose the key in the browser bundle.
+
 Get your free API key at: https://aistudio.google.com
+
+For Vercel deployment, set `GEMINI_API_KEY` in **Vercel Dashboard → Settings → Environment Variables**.
 
 ---
 
@@ -166,11 +175,12 @@ Get your free API key at: https://aistudio.google.com
 
 ## 🔒 Security
 
-- API keys stored in environment variables only
-- Never exposed in client-side code or logs
-- AI responses sanitized before rendering
-- No user data stored on any server
-- All processing happens client-side
+- API key stored as server-only environment variable (`GEMINI_API_KEY`, no `VITE_` prefix)
+- All Gemini API calls proxied through Vercel Serverless Functions — key never reaches the browser
+- Serverless functions include input validation, payload size limits, and error sanitization
+- AI responses sanitized before rendering (XSS protection)
+- No user data stored on any server — PDF processing happens client-side
+- API key is never logged or included in error responses
 
 ---
 

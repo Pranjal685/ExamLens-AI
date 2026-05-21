@@ -73,7 +73,7 @@ function EmptyDashboard() {
 }
 
 export default function Dashboard() {
-  const { analysisData, analysisComplete, isAnalyzing, uploadedFilesMetadata } = useAppStore()
+  const { analysisData, isAnalyzing, uploadedFilesMetadata } = useAppStore()
 
   // Loading state
   if (isAnalyzing) {

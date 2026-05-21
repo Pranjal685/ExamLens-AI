@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { UploadCloud, FileText, X, Info, ArrowRight, Loader2, AlertCircle, Trash2, RefreshCw } from 'lucide-react'
@@ -9,6 +9,8 @@ import { analyzePapers } from '../utils/analyzePapers'
 
 const BRAND = 'var(--brand)'
 const SUBJECTS = ['Physics', 'Chemistry', 'Mathematics', 'Biology', 'History', 'Economics', 'Computer Science']
+const MAX_FILE_BYTES = 50 * 1024 * 1024
+const SOFT_FILE_LIMIT = 10
 
 function ShimmerBlock({ h = 14 }) {
   return <div className="shimmer" style={{ height:h, borderRadius:6, flex:1 }} />
@@ -48,19 +50,8 @@ export default function Upload() {
   // On mount: if metadata exists but no local files, show session notice (handled by staleSession derived state)
   const staleSession = uploadedFilesMetadata.length > 0 && localFiles.length === 0
 
-  const handleDrop = useCallback((e) => {
-    e.preventDefault(); setDragOver(false)
-    Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf').forEach(addFile)
-  }, [])
 
-  const handleFileInput = (e) => {
-    Array.from(e.target.files).filter(f => f.type === 'application/pdf').forEach(addFile)
-  }
-
-  const MAX_FILE_BYTES = 50 * 1024 * 1024
-  const SOFT_FILE_LIMIT = 10
-
-  function addFile(f) {
+  const addFile = useCallback((f) => {
     if (f.size > MAX_FILE_BYTES) {
       setErrorMsg(`"${f.name}" is too large. Maximum file size is 50MB.`)
       return
@@ -76,6 +67,15 @@ export default function Upload() {
       return next
     })
     addFileMetadata(meta)
+  }, [addFileMetadata])
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault(); setDragOver(false)
+    Array.from(e.dataTransfer.files).filter(f => f.type === 'application/pdf').forEach(addFile)
+  }, [addFile])
+
+  const handleFileInput = (e) => {
+    Array.from(e.target.files).filter(f => f.type === 'application/pdf').forEach(addFile)
   }
 
   function removeFile(id) {
