@@ -62,7 +62,7 @@ const server = createServer(async (httpReq, httpRes) => {
   httpRes.end(res._data ? JSON.stringify(res._data) : '')
 })
 
-server.listen(PORT, () => {
+server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n  API server running at http://localhost:${PORT}`)
   console.log(`  Routes: POST /api/gemini, POST /api/vision`)
   console.log(`  GEMINI_API_KEY: ${process.env.GEMINI_API_KEY ? '✓ loaded' : '✗ MISSING'}\n`)
