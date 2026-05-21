@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![ExamLens AI](link-to-screenshot)
-
 **AI-powered past paper analyzer that identifies high-yield topics, predicts exam patterns, and generates personalized study plans.**
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://exam-lens-ai.vercel.app/)
@@ -188,7 +186,7 @@ For Vercel deployment, set `GEMINI_API_KEY` in **Vercel Dashboard → Settings �
 
 Built for **AI DecodeX Hackathon** by UnsaidTalks
 
-**[Your Name]** — [GitHub Profile]
+**Pranjal Sahu** — https://github.com/Pranjal685
 
 ---
 
